@@ -1,6 +1,15 @@
 import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, CheckCircle2, Circle, Upload } from 'lucide-react';
+import { ArrowLeft, CheckCircle2, Circle, Upload, Clock } from 'lucide-react';
+
+const STAGE_TYPICAL: Record<string, { label: string; tips: string[] }> = {
+  PROFILE_PREAPPROVAL:      { label: '1–2 weeks', tips: ['Contact 2–3 lenders to compare rates', 'Gather pay stubs and tax returns in advance'] },
+  SEARCHING:                { label: '4–6 weeks', tips: ['Tour at least 5–7 homes before deciding', 'Save homes to compare side by side'] },
+  OFFER_SUBMITTED:          { label: '3–7 days', tips: ['Respond to counter-offers within 24 hours', 'Have your earnest money ready'] },
+  INSPECTION_DUE_DILIGENCE: { label: '1–2 weeks', tips: ['Schedule inspection within 3 days of acceptance', 'Attend the inspection in person if possible'] },
+  APPRAISAL_UNDERWRITING:   { label: '2–3 weeks', tips: ['Respond quickly to lender document requests', 'Avoid large purchases or new credit inquiries'] },
+  CLOSING:                  { label: '1–2 weeks', tips: ['Do final walkthrough 24 hours before closing', 'Wire closing funds 1–2 days early'] },
+};
 import { useJourneyStore } from '@/store/journeyStore';
 import { useAuthStore } from '@/store/authStore';
 import { JOURNEY_STAGES } from '@/constants';
@@ -44,6 +53,8 @@ export default function StageDetailPage() {
 
   const allTasksDone = stageData.tasks.every((t) => t.completed);
   const isCurrentStage = pipeline?.currentStage === stage;
+  const stageTypical = stage ? STAGE_TYPICAL[stage] : null;
+  const completedTasks = stageData.tasks.filter((t) => t.completed).length;
 
   const handleComplete = (taskId: string) => {
     completeTask(stage!, taskId);
@@ -69,6 +80,33 @@ export default function StageDetailPage() {
       </div>
 
       <p className="text-sm text-slate-600 leading-relaxed">{stageInfo.description}</p>
+
+      {/* Time estimate + progress */}
+      {stageTypical && (
+        <div className="card p-4">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <Clock size={15} className="text-brand-500" />
+              <span className="text-sm font-semibold text-slate-700">Typical timeline</span>
+            </div>
+            <span className="badge bg-brand-50 text-brand-700 text-xs">{stageTypical.label}</span>
+          </div>
+          <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden mb-3">
+            <div
+              className="h-full bg-brand-500 rounded-full transition-all"
+              style={{ width: stageData.tasks.length > 0 ? `${(completedTasks / stageData.tasks.length) * 100}%` : '0%' }}
+            />
+          </div>
+          <p className="text-xs text-slate-500 mb-2">{completedTasks}/{stageData.tasks.length} tasks done</p>
+          <div className="space-y-1">
+            {stageTypical.tips.map((tip, i) => (
+              <p key={i} className="text-xs text-slate-500 flex gap-1.5">
+                <span className="text-brand-400 flex-shrink-0">→</span>{tip}
+              </p>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Tasks */}
       <div>

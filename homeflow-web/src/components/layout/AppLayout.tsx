@@ -9,6 +9,7 @@ import {
   Bell,
   User,
 } from 'lucide-react';
+import { useState } from 'react';
 import { cn } from '@/utils/cn';
 import { useChatStore } from '@/store/chatStore';
 import { useSearchStore } from '@/store/searchStore';
@@ -25,7 +26,11 @@ export default function AppLayout() {
   const location = useLocation();
   const navigate = useNavigate();
   const { isLoading: chatLoading } = useChatStore();
-  const { savedHomes } = useSearchStore();
+  const { savedHomes, savedPrices } = useSearchStore();
+  const [showNotifications, setShowNotifications] = useState(false);
+
+  const priceDropCount = savedHomes.filter((p) => savedPrices[p.id] && p.price < savedPrices[p.id]!).length;
+  const hasAlerts = priceDropCount > 0;
 
   const isActive = (path: string) => location.pathname.startsWith(path);
 
@@ -56,9 +61,49 @@ export default function AppLayout() {
                 <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-brand-500 rounded-full animate-pulse" />
               )}
             </button>
-            <button className="relative p-2 rounded-xl hover:bg-warm-100 transition-colors text-[#5c5c5c]">
-              <Bell size={20} />
-            </button>
+            <div className="relative">
+              <button
+                onClick={() => setShowNotifications((v) => !v)}
+                className="relative p-2 rounded-xl hover:bg-warm-100 transition-colors text-[#5c5c5c]"
+              >
+                <Bell size={20} />
+                {hasAlerts && (
+                  <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-green-500 rounded-full" />
+                )}
+              </button>
+
+              {showNotifications && (
+                <>
+                  <div className="fixed inset-0 z-30" onClick={() => setShowNotifications(false)} />
+                  <div className="absolute right-0 top-10 z-40 w-72 bg-white rounded-2xl shadow-xl border border-warm-200 overflow-hidden animate-fade-in">
+                    <div className="px-4 py-3 border-b border-warm-100">
+                      <p className="font-semibold text-sm text-slate-900">Notifications</p>
+                    </div>
+                    {priceDropCount > 0 ? (
+                      <button
+                        onClick={() => { setShowNotifications(false); navigate('/saved'); }}
+                        className="w-full flex items-start gap-3 px-4 py-3 hover:bg-warm-50 text-left transition-colors"
+                      >
+                        <span className="text-lg">🎉</span>
+                        <div>
+                          <p className="text-sm font-semibold text-slate-900">
+                            {priceDropCount} price {priceDropCount === 1 ? 'drop' : 'drops'}
+                          </p>
+                          <p className="text-xs text-slate-500 mt-0.5">
+                            Homes you saved have dropped in price
+                          </p>
+                        </div>
+                      </button>
+                    ) : (
+                      <div className="px-4 py-6 text-center">
+                        <p className="text-sm text-slate-400">No new alerts</p>
+                        <p className="text-xs text-slate-300 mt-1">Save homes to get price drop alerts</p>
+                      </div>
+                    )}
+                  </div>
+                </>
+              )}
+            </div>
             <button
               onClick={() => navigate('/profile')}
               className="w-8 h-8 rounded-full bg-brand-100 flex items-center justify-center"

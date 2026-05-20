@@ -7,6 +7,7 @@ import { mapDbPropertyToApp } from '../lib/mappers';
 interface SearchState {
   filters: SearchFilters;
   savedHomes: Property[];
+  savedPrices: Record<string, number>;  // price at time of save for change detection
   compareList: string[];
   viewedProperties: string[];
   lastQuery: string;
@@ -39,6 +40,7 @@ const DEFAULT_FILTERS: SearchFilters = {
 export const useSearchStore = create<SearchState>()((set, get) => ({
   filters: DEFAULT_FILTERS,
   savedHomes: [],
+  savedPrices: {},
   compareList: [],
   viewedProperties: [],
   lastQuery: '',
@@ -78,7 +80,10 @@ export const useSearchStore = create<SearchState>()((set, get) => ({
       .insert({ user_id: userId, property_id: property.id });
 
     if (!error) {
-      set({ savedHomes: [...savedHomes, property] });
+      set((state) => ({
+        savedHomes: [...state.savedHomes, property],
+        savedPrices: { ...state.savedPrices, [property.id]: property.price },
+      }));
     }
     return !error;
   },

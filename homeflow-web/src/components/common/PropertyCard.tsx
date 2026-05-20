@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Heart, Calendar, BedDouble, Bath, Maximize2, Star } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
@@ -5,6 +6,7 @@ import type { Property } from '@/types';
 import { cn, formatCurrency, formatSqft, relativeTime } from '@/utils/cn';
 import { useSearchStore } from '@/store/searchStore';
 import { useAuthStore } from '@/store/authStore';
+import ScheduleModal from './ScheduleModal';
 
 interface PropertyCardProps {
   property: Property;
@@ -23,6 +25,7 @@ export default function PropertyCard({
   const { saveHome, unsaveHome, isSaved } = useSearchStore();
   const { user } = useAuthStore();
   const saved = isSaved(property.id);
+  const [showSchedule, setShowSchedule] = useState(false);
 
   const handleSave = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -175,7 +178,7 @@ export default function PropertyCard({
         <button
           onClick={(e) => {
             e.stopPropagation();
-            navigate(`/schedule?propertyId=${property.id}`);
+            setShowSchedule(true);
           }}
           className="w-full mt-3 flex items-center justify-center gap-1.5 py-2 rounded-xl bg-brand-50 hover:bg-brand-100 text-brand-700 text-xs font-semibold transition-colors"
         >
@@ -183,6 +186,14 @@ export default function PropertyCard({
           Schedule Viewing
         </button>
       </div>
+
+      {showSchedule && (
+        <ScheduleModal
+          propertyId={property.id}
+          propertyAddress={property.address.formattedAddress}
+          onClose={() => setShowSchedule(false)}
+        />
+      )}
     </button>
   );
 }

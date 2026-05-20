@@ -4,10 +4,12 @@ import {
   Maximize2, Star, MapPin, TrendingUp, School,
   Sparkles,
 } from 'lucide-react';
+import { useState } from 'react';
 import { useSearchStore } from '@/store/searchStore';
 import { useAuthStore } from '@/store/authStore';
 import { useProperty } from '@/hooks/useProperties';
 import { cn, formatCurrency, formatSqft } from '@/utils/cn';
+import ScheduleModal from '@/components/common/ScheduleModal';
 
 export default function PropertyDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -30,6 +32,7 @@ export default function PropertyDetailPage() {
 
   const saved = isSaved(property.id);
   const inCompare = isInCompare(property.id);
+  const [showSchedule, setShowSchedule] = useState(false);
 
   return (
     <div className="pb-32">
@@ -194,12 +197,19 @@ export default function PropertyDetailPage() {
       <div className="fixed bottom-[64px] left-0 right-0 px-4 pb-4 glass border-t border-warm-200 pt-3">
         <div className="max-w-lg mx-auto">
           <button
-            onClick={() => navigate(`/schedule?propertyId=${property.id}`)}
+            onClick={() => setShowSchedule(true)}
             className="btn-primary w-full flex items-center justify-center gap-2"
           >
             <Calendar size={17} />
             Schedule a Viewing
           </button>
+          {showSchedule && (
+            <ScheduleModal
+              propertyId={property.id}
+              propertyAddress={property.address.formattedAddress}
+              onClose={() => setShowSchedule(false)}
+            />
+          )}
         </div>
       </div>
     </div>

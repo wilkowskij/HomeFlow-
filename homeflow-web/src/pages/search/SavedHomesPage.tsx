@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Heart, SlidersHorizontal, ArrowUpDown } from 'lucide-react';
 import { useSearchStore } from '@/store/searchStore';
 import PropertyCard from '@/components/common/PropertyCard';
-import { cn } from '@/utils/cn';
+import { cn, formatCurrency } from '@/utils/cn';
 import type { Property } from '@/types';
 
 type SortKey = 'saved' | 'price-asc' | 'price-desc' | 'match';
@@ -26,7 +26,13 @@ function sortHomes(homes: Property[], sort: SortKey): Property[] {
 
 export default function SavedHomesPage() {
   const navigate = useNavigate();
-  const { savedHomes, compareList, toggleCompare } = useSearchStore();
+  const { savedHomes, savedPrices, compareList, toggleCompare } = useSearchStore();
+
+  // Detect price drops
+  const priceDrops = savedHomes.filter((p) => {
+    const savedAt = savedPrices[p.id];
+    return savedAt && p.price < savedAt;
+  });
   const [sort, setSort] = useState<SortKey>('saved');
   const [showSort, setShowSort] = useState(false);
 
@@ -84,6 +90,24 @@ export default function SavedHomesPage() {
               {label}
             </button>
           ))}
+        </div>
+      )}
+
+      {/* Price drop alerts */}
+      {priceDrops.length > 0 && (
+        <div className="mb-4 p-4 rounded-2xl bg-green-50 border border-green-200 animate-slide-up">
+          <p className="text-sm font-semibold text-green-800 mb-2">
+            🎉 {priceDrops.length} price {priceDrops.length === 1 ? 'drop' : 'drops'} on your saved homes
+          </p>
+          {priceDrops.map((p) => {
+            const savedAt = savedPrices[p.id]!;
+            const drop = savedAt - p.price;
+            return (
+              <p key={p.id} className="text-xs text-green-700">
+                {p.address.street} dropped {formatCurrency(drop, true)} → now {formatCurrency(p.price, true)}
+              </p>
+            );
+          })}
         </div>
       )}
 
