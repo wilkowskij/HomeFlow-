@@ -1,4 +1,4 @@
-# HomeFlow 🏡
+# HomeFlow
 
 **AI-powered home buying companion for New Jersey buyers.**
 
