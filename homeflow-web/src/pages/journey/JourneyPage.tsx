@@ -1,20 +1,32 @@
+import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { UserPlus, ChevronRight, TrendingUp } from 'lucide-react';
 import { useJourneyStore } from '@/store/journeyStore';
+import { useAuthStore } from '@/store/authStore';
 import PipelineProgress from '@/components/common/PipelineProgress';
 import { JOURNEY_STAGES } from '@/constants';
 
 export default function JourneyPage() {
   const navigate = useNavigate();
-  const { pipeline, getCompletionPercent } = useJourneyStore();
+  const { pipeline, isLoading, initPipeline } = useJourneyStore();
+  const { user } = useAuthStore();
 
-  if (!pipeline) {
+  // Auto-create pipeline if it doesn't exist in Supabase yet
+  useEffect(() => {
+    if (!isLoading && !pipeline && user?.id) {
+      initPipeline(user.id);
+    }
+  }, [isLoading, pipeline, user?.id, initPipeline]);
+
+  if (isLoading || (!pipeline && user?.id)) {
     return (
       <div className="flex items-center justify-center h-64">
-        <p className="text-slate-500">Loading your journey…</p>
+        <p className="text-slate-500">Setting up your journey…</p>
       </div>
     );
   }
+
+  if (!pipeline) return null;
 
   const completionPct = getCompletionPercent();
   const currentStageInfo = JOURNEY_STAGES.find((s) => s.stage === pipeline.currentStage);
@@ -93,4 +105,10 @@ export default function JourneyPage() {
       )}
     </div>
   );
+
+  function getCompletionPercent() {
+    if (!pipeline) return 0;
+    const completedCount = pipeline.stages.filter((s) => s.status === 'COMPLETED').length;
+    return Math.round((completedCount / JOURNEY_STAGES.length) * 100);
+  }
 }
