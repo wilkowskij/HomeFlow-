@@ -1,0 +1,7 @@
+{
+  "buildCommand": "pnpm --filter @homeflow/web run build",
+  "outputDirectory": "homeflow-web/dist",
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
+}

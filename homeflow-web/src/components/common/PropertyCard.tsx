@@ -1,8 +1,9 @@
 import { Heart, Calendar, BedDouble, Bath, Maximize2, Star } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import type { Property } from '@homeflow/shared';
+import type { Property } from '@/types';
 import { cn, formatCurrency, formatSqft, relativeTime } from '@/utils/cn';
 import { useSearchStore } from '@/store/searchStore';
+import { useAuthStore } from '@/store/authStore';
 
 interface PropertyCardProps {
   property: Property;
@@ -19,17 +20,16 @@ export default function PropertyCard({
 }: PropertyCardProps) {
   const navigate = useNavigate();
   const { saveHome, unsaveHome, isSaved } = useSearchStore();
+  const { user } = useAuthStore();
   const saved = isSaved(property.id);
 
   const handleSave = (e: React.MouseEvent) => {
     e.stopPropagation();
+    if (!user) return;
     if (saved) {
-      unsaveHome(property.id);
+      unsaveHome(property.id, user.id);
     } else {
-      const ok = saveHome(property);
-      if (!ok) {
-        // toast handled by caller
-      }
+      saveHome(property, user.id);
     }
   };
 
@@ -138,7 +138,7 @@ export default function PropertyCard({
         </div>
 
         {/* Stats row */}
-        <div className="flex items-center gap-4 mt-3 pt-3 border-t border-slate-100">
+        <div className="flex items-center gap-4 mt-3 pt-3 border-t border-warm-200">
           <span className="flex items-center gap-1 text-xs text-slate-600">
             <BedDouble size={13} className="text-slate-400" />
             {property.beds} bd

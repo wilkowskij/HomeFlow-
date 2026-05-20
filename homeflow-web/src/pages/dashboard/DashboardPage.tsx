@@ -5,16 +5,15 @@ import { useJourneyStore } from '@/store/journeyStore';
 import { useSearchStore } from '@/store/searchStore';
 import PropertyCard from '@/components/common/PropertyCard';
 import PipelineProgress from '@/components/common/PipelineProgress';
-import { JOURNEY_STAGES } from '@homeflow/shared';
-
-// Mock recommended properties – replace with real API data
-import { MOCK_PROPERTIES } from '@/utils/mockData';
+import { JOURNEY_STAGES } from '@/constants';
+import { useProperties } from '@/hooks/useProperties';
 
 export default function DashboardPage() {
   const navigate = useNavigate();
   const { user, profile } = useAuthStore();
   const { pipeline } = useJourneyStore();
   const { savedHomes } = useSearchStore();
+  const { data: recommended = [] } = useProperties({ pageSize: 3, sortBy: 'match-score' }, user?.id);
 
   const currentStageInfo = pipeline
     ? JOURNEY_STAGES.find((s) => s.stage === pipeline.currentStage)
@@ -26,7 +25,7 @@ export default function DashboardPage() {
     <div className="px-4 pt-4 pb-6 space-y-6">
       {/* Greeting */}
       <div>
-        <h1 className="font-display font-bold text-2xl text-slate-900">
+        <h1 className="font-display font-bold text-2xl text-[#2c2c2c]">
           Hey, {firstName} 👋
         </h1>
         <p className="text-slate-500 text-sm mt-1">
@@ -89,11 +88,11 @@ export default function DashboardPage() {
       {/* Quick stats */}
       <div className="grid grid-cols-3 gap-3">
         {[
-          { label: 'Saved', value: savedHomes.length, color: 'bg-pink-50 text-pink-600' },
-          { label: 'Viewings', value: 0, color: 'bg-purple-50 text-purple-600' },
-          { label: 'Searches', value: 3, color: 'bg-amber-50 text-amber-600' },
-        ].map(({ label, value, color }) => (
-          <div key={label} className={`card p-4 text-center ${color}`}>
+          { label: 'Saved',    value: savedHomes.length, color: 'text-accent-600',  bg: 'bg-accent-100' },
+          { label: 'Viewings', value: 0,                 color: 'text-brand-600',   bg: 'bg-brand-100'  },
+          { label: 'Searches', value: 3,                 color: 'text-[#5f7a6b]',   bg: 'bg-warm-100'   },
+        ].map(({ label, value, color, bg }) => (
+          <div key={label} className={`card p-4 text-center ${color} ${bg}`}>
             <p className="font-display font-bold text-2xl">{value}</p>
             <p className="text-xs font-medium opacity-70 mt-0.5">{label}</p>
           </div>
@@ -116,7 +115,7 @@ export default function DashboardPage() {
         </div>
 
         <div className="space-y-4">
-          {MOCK_PROPERTIES.slice(0, 3).map((property) => (
+          {recommended.map((property) => (
             <PropertyCard key={property.id} property={property} />
           ))}
         </div>
@@ -127,8 +126,8 @@ export default function DashboardPage() {
         className="card p-5 flex items-center gap-4 cursor-pointer hover:shadow-card-hover transition-shadow"
         onClick={() => navigate('/schedule/itinerary')}
       >
-        <div className="w-12 h-12 rounded-2xl bg-indigo-100 flex items-center justify-center flex-shrink-0">
-          <Calendar size={22} className="text-indigo-600" />
+        <div className="w-12 h-12 rounded-2xl bg-brand-100 flex items-center justify-center flex-shrink-0">
+          <Calendar size={22} className="text-brand-600" />
         </div>
         <div className="flex-1">
           <p className="font-semibold text-slate-900">Plan a viewing day</p>

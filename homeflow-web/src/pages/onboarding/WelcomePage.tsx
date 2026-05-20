@@ -1,7 +1,8 @@
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Home, ArrowRight, Sparkles, MapPin, Calendar } from 'lucide-react';
+import { Home, ArrowRight, Sparkles, MapPin, Calendar, Mail, Eye, EyeOff, X } from 'lucide-react';
 import { useAuthStore } from '@/store/authStore';
-import { generateId } from '@/utils/cn';
+import { cn } from '@/utils/cn';
 
 const FEATURES = [
   {
@@ -21,35 +22,46 @@ const FEATURES = [
   },
 ];
 
+type EmailMode = 'hidden' | 'signin' | 'signup';
+
 export default function WelcomePage() {
   const navigate = useNavigate();
-  const { setUser } = useAuthStore();
+  const { signInWithGoogle, signInWithApple, signInWithEmail, signUpWithEmail, isLoading } = useAuthStore();
 
-  const handleSignIn = () => {
-    // TODO: implement real OAuth flow
-    setUser({
-      id: generateId('user'),
-      email: `demo@homeflow.app`,
-      displayName: 'Demo User',
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    });
-    navigate('/onboarding');
+  const [emailMode, setEmailMode] = useState<EmailMode>('hidden');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [displayName, setDisplayName] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+
+  const handleEmailSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+    setSubmitting(true);
+
+    const err =
+      emailMode === 'signup'
+        ? await signUpWithEmail(email, password, displayName)
+        : await signInWithEmail(email, password);
+
+    setSubmitting(false);
+    if (err) {
+      setError(err.message);
+    } else if (emailMode === 'signup') {
+      // After sign-up Supabase may require email confirmation; inform the user.
+      setError(null);
+      setEmailMode('hidden');
+      navigate('/onboarding');
+    }
+    // Sign-in success: onAuthStateChange fires → App.tsx redirects automatically.
   };
 
-  const handleGuest = () => {
-    setUser({
-      id: generateId('guest'),
-      email: 'guest@homeflow.app',
-      displayName: 'Guest',
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    });
-    navigate('/dashboard');
-  };
+  const busy = isLoading || submitting;
 
   return (
-    <div className="min-h-[100dvh] flex flex-col bg-white">
+    <div className="min-h-[100dvh] flex flex-col bg-warm-50">
       {/* Hero */}
       <div className="flex-1 flex flex-col items-center justify-center px-6 pt-12 pb-8 text-center">
         {/* Logo */}
@@ -57,7 +69,7 @@ export default function WelcomePage() {
           <Home size={28} className="text-white" />
         </div>
 
-        <h1 className="font-display font-bold text-4xl text-slate-900 leading-tight text-balance mb-3">
+        <h1 className="font-display font-bold text-4xl text-[#2c2c2c] leading-tight text-balance mb-3">
           Find your home,{' '}
           <span className="text-brand-600">stress&#8209;free</span>
         </h1>
@@ -71,7 +83,7 @@ export default function WelcomePage() {
           {FEATURES.map(({ icon: Icon, title, desc }) => (
             <div
               key={title}
-              className="flex items-start gap-3 p-4 rounded-2xl bg-slate-50 text-left animate-slide-up"
+              className="flex items-start gap-3 p-4 rounded-2xl bg-warm-100 text-left animate-slide-up"
             >
               <div className="w-9 h-9 rounded-xl bg-brand-100 flex items-center justify-center flex-shrink-0 mt-0.5">
                 <Icon size={17} className="text-brand-600" />
@@ -87,36 +99,130 @@ export default function WelcomePage() {
 
       {/* CTAs */}
       <div className="px-6 pb-10 space-y-3">
+        {/* Google */}
         <button
-          onClick={handleSignIn}
-          className="w-full flex items-center justify-center gap-3 py-3.5 rounded-2xl border-2 border-slate-200 bg-white hover:bg-slate-50 transition-colors font-semibold text-slate-700"
+          onClick={signInWithGoogle}
+          disabled={busy}
+          className="w-full flex items-center justify-center gap-3 py-3.5 rounded-2xl border border-warm-200 bg-warm-50 hover:bg-warm-100 transition-colors font-semibold text-[#2c2c2c] disabled:opacity-60"
+          style={{ boxShadow: '4px 4px 8px rgba(0,0,0,0.07), -4px -4px 8px rgba(255,255,255,0.70)' }}
         >
           <img src="/google-icon.svg" alt="Google" className="w-5 h-5" />
           Continue with Google
         </button>
 
+        {/* Apple */}
         <button
-          onClick={handleSignIn}
-          className="w-full flex items-center justify-center gap-3 py-3.5 rounded-2xl bg-slate-900 hover:bg-slate-800 transition-colors font-semibold text-white"
+          onClick={signInWithApple}
+          disabled={busy}
+          className="w-full flex items-center justify-center gap-3 py-3.5 rounded-2xl bg-slate-900 hover:bg-slate-800 transition-colors font-semibold text-white disabled:opacity-60"
         >
           <img src="/apple-icon.svg" alt="Apple" className="w-4 h-4 invert" />
           Continue with Apple
         </button>
 
-        <button
-          onClick={handleSignIn}
-          className="w-full btn-primary flex items-center justify-center gap-2"
-        >
-          Sign up with Email
-          <ArrowRight size={16} />
-        </button>
+        {/* Email toggle */}
+        {emailMode === 'hidden' ? (
+          <button
+            onClick={() => setEmailMode('signup')}
+            disabled={busy}
+            className="w-full btn-primary flex items-center justify-center gap-2 disabled:opacity-60"
+          >
+            <Mail size={16} />
+            Sign up with Email
+            <ArrowRight size={16} />
+          </button>
+        ) : (
+          /* Email form */
+          <form
+            onSubmit={handleEmailSubmit}
+            className="w-full rounded-2xl border border-slate-200 bg-white p-4 space-y-3 animate-fade-in"
+          >
+            <div className="flex items-center justify-between mb-1">
+              <p className="font-semibold text-slate-900 text-sm">
+                {emailMode === 'signup' ? 'Create account' : 'Sign in'}
+              </p>
+              <button
+                type="button"
+                onClick={() => { setEmailMode('hidden'); setError(null); }}
+                className="p-1 hover:bg-slate-100 rounded-lg"
+              >
+                <X size={15} className="text-slate-400" />
+              </button>
+            </div>
 
-        <button
-          onClick={handleGuest}
-          className="w-full text-center text-sm text-slate-400 hover:text-slate-600 py-2 transition-colors"
-        >
-          Continue as guest (limited access)
-        </button>
+            {emailMode === 'signup' && (
+              <input
+                className="input-base w-full text-sm"
+                placeholder="Your name"
+                value={displayName}
+                onChange={(e) => setDisplayName(e.target.value)}
+                required
+                autoFocus
+              />
+            )}
+
+            <input
+              type="email"
+              className="input-base w-full text-sm"
+              placeholder="Email address"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              autoFocus={emailMode === 'signin'}
+            />
+
+            <div className="relative">
+              <input
+                type={showPassword ? 'text' : 'password'}
+                className="input-base w-full text-sm pr-10"
+                placeholder="Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                minLength={6}
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword((v) => !v)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+              >
+                {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
+              </button>
+            </div>
+
+            {error && (
+              <p className="text-xs text-red-600 bg-red-50 rounded-lg px-3 py-2">{error}</p>
+            )}
+
+            <button
+              type="submit"
+              disabled={busy}
+              className="w-full btn-primary text-sm flex items-center justify-center gap-2 disabled:opacity-60"
+            >
+              {submitting ? 'Please wait…' : emailMode === 'signup' ? 'Create account' : 'Sign in'}
+            </button>
+
+            <p className="text-center text-xs text-slate-400">
+              {emailMode === 'signup' ? 'Already have an account?' : "Don't have an account?"}{' '}
+              <button
+                type="button"
+                onClick={() => { setEmailMode(emailMode === 'signup' ? 'signin' : 'signup'); setError(null); }}
+                className={cn('font-semibold', 'text-brand-600 hover:text-brand-700')}
+              >
+                {emailMode === 'signup' ? 'Sign in' : 'Sign up'}
+              </button>
+            </p>
+          </form>
+        )}
+
+        {emailMode === 'hidden' && (
+          <button
+            onClick={() => setEmailMode('signin')}
+            className="w-full text-center text-sm text-slate-400 hover:text-slate-600 py-2 transition-colors"
+          >
+            Already have an account? Sign in
+          </button>
+        )}
       </div>
     </div>
   );

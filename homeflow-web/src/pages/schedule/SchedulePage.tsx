@@ -11,7 +11,7 @@ export default function SchedulePage() {
   const { appointments } = useScheduleStore();
 
   const upcoming = appointments.filter(
-    (a) => a.status !== 'cancelled' && a.slot?.startTime && a.slot.startTime > new Date().toISOString(),
+    (a) => a.status !== 'CANCELLED' && a.slot?.startTime && a.slot.startTime > new Date().toISOString(),
   );
 
   return (
@@ -39,7 +39,7 @@ export default function SchedulePage() {
             {['Today 2:00 PM', 'Tomorrow 10:00 AM', 'Saturday 1:00 PM'].map((slot) => (
               <button
                 key={slot}
-                className="w-full flex items-center gap-3 p-3 bg-white rounded-xl hover:bg-brand-50 transition-colors border border-slate-100"
+                className="w-full flex items-center gap-3 p-3 bg-warm-50 rounded-xl hover:bg-brand-50 transition-colors border border-warm-200"
               >
                 <Clock size={15} className="text-brand-500" />
                 <span className="text-sm font-medium text-slate-900">{slot}</span>
@@ -55,8 +55,8 @@ export default function SchedulePage() {
         onClick={() => navigate('/schedule/itinerary')}
         className="w-full card p-4 flex items-center gap-4 hover:shadow-card-hover transition-shadow text-left"
       >
-        <div className="w-12 h-12 rounded-2xl bg-indigo-100 flex items-center justify-center flex-shrink-0">
-          <Route size={22} className="text-indigo-600" />
+        <div className="w-12 h-12 rounded-2xl bg-brand-100 flex items-center justify-center flex-shrink-0">
+          <Route size={22} className="text-brand-600" />
         </div>
         <div className="flex-1">
           <p className="font-semibold text-slate-900">Multi-property Tour Builder</p>
@@ -108,7 +108,7 @@ export default function SchedulePage() {
                       <span
                         className={cn(
                           'badge text-[10px]',
-                          appt.status === 'confirmed'
+                          appt.status === 'CONFIRMED'
                             ? 'bg-green-100 text-green-700'
                             : 'bg-amber-100 text-amber-700',
                         )}

@@ -1,7 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, X } from 'lucide-react';
 import { useSearchStore } from '@/store/searchStore';
-import { MOCK_PROPERTIES } from '@/utils/mockData';
 import { formatCurrency, formatSqft } from '@/utils/cn';
 
 type CompareFieldKey = 'price' | 'beds' | 'baths' | 'sqft' | 'yearBuilt';
@@ -20,8 +19,8 @@ const COMPARE_FIELDS: Array<{
 
 export default function ComparePage() {
   const navigate = useNavigate();
-  const { compareList, toggleCompare } = useSearchStore();
-  const properties = MOCK_PROPERTIES.filter((p) => compareList.includes(p.id));
+  const { compareList, toggleCompare, savedHomes } = useSearchStore();
+  const properties = savedHomes.filter((p) => compareList.includes(p.id));
 
   if (properties.length === 0) {
     return (
@@ -41,7 +40,7 @@ export default function ComparePage() {
   return (
     <div className="px-4 pt-4 pb-8">
       <div className="flex items-center gap-3 mb-5">
-        <button onClick={() => navigate(-1)} className="p-2 hover:bg-slate-100 rounded-xl">
+        <button onClick={() => navigate(-1)} className="p-2 hover:bg-warm-100 rounded-xl">
           <ArrowLeft size={18} />
         </button>
         <h1 className="font-display font-bold text-xl">Compare Homes</h1>
@@ -68,10 +67,10 @@ export default function ComparePage() {
         {COMPARE_FIELDS.map(({ key, label, format }, i) => (
           <div
             key={key}
-            className={`grid gap-px ${i > 0 ? 'border-t border-slate-100' : ''}`}
+            className={`grid gap-px ${i > 0 ? 'border-t border-warm-200' : ''}`}
             style={{ gridTemplateColumns: `120px repeat(${properties.length}, 1fr)` }}
           >
-            <div className="bg-slate-50 p-3 flex items-center">
+            <div className="bg-warm-50 p-3 flex items-center">
               <span className="text-xs font-semibold text-slate-500">{label}</span>
             </div>
             {properties.map((p) => (

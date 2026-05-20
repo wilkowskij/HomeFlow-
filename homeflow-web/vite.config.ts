@@ -7,7 +7,6 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
-      '@homeflow/shared': path.resolve(__dirname, '../homeflow-shared/src/index.ts'),
     },
   },
   server: {

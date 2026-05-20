@@ -5,15 +5,21 @@ import {
   Sparkles,
 } from 'lucide-react';
 import { useSearchStore } from '@/store/searchStore';
-import { MOCK_PROPERTIES } from '@/utils/mockData';
+import { useAuthStore } from '@/store/authStore';
+import { useProperty } from '@/hooks/useProperties';
 import { cn, formatCurrency, formatSqft } from '@/utils/cn';
 
 export default function PropertyDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { saveHome, unsaveHome, isSaved, toggleCompare, isInCompare } = useSearchStore();
+  const { user } = useAuthStore();
 
-  const property = MOCK_PROPERTIES.find((p) => p.id === id);
+  const { data: property, isLoading } = useProperty(id ?? '', user?.id);
+
+  if (isLoading) {
+    return <div className="flex items-center justify-center h-64"><p className="text-slate-400">Loading…</p></div>;
+  }
   if (!property) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -49,7 +55,7 @@ export default function PropertyDetailPage() {
             <Share2 size={15} className="text-slate-700" />
           </button>
           <button
-            onClick={() => saved ? unsaveHome(property.id) : saveHome(property)}
+            onClick={() => user && (saved ? unsaveHome(property.id, user.id) : saveHome(property, user.id))}
             className="w-9 h-9 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center shadow-sm"
           >
             <Heart size={15} className={cn(saved ? 'fill-red-500 text-red-500' : 'text-slate-700')} />
@@ -86,7 +92,7 @@ export default function PropertyDetailPage() {
           </div>
 
           {/* Stats */}
-          <div className="flex items-center gap-4 mt-4 p-4 rounded-2xl bg-slate-50">
+          <div className="flex items-center gap-4 mt-4 p-4 rounded-2xl bg-warm-50">
             <div className="flex-1 flex flex-col items-center">
               <BedDouble size={18} className="text-slate-400 mb-1" />
               <span className="font-bold text-slate-900">{property.beds}</span>
@@ -149,7 +155,7 @@ export default function PropertyDetailPage() {
               ]
                 .filter((item) => item.value != null)
                 .map(({ icon: Icon, label, value }) => (
-                  <div key={label} className="flex items-center gap-2 p-3 rounded-xl bg-slate-50">
+                  <div key={label} className="flex items-center gap-2 p-3 rounded-xl bg-warm-50">
                     <Icon size={15} className="text-brand-500" />
                     <div>
                       <p className="text-xs text-slate-500">{label}</p>
@@ -168,7 +174,7 @@ export default function PropertyDetailPage() {
             'w-full py-3 rounded-xl border-2 text-sm font-semibold transition-all',
             inCompare
               ? 'border-brand-500 text-brand-600 bg-brand-50'
-              : 'border-slate-200 text-slate-600 hover:border-brand-300',
+              : 'border-warm-200 text-slate-600 hover:border-brand-300',
           )}
         >
           {inCompare ? '✓ Added to Compare' : '+ Add to Compare'}
@@ -182,7 +188,7 @@ export default function PropertyDetailPage() {
       </div>
 
       {/* Sticky CTA */}
-      <div className="fixed bottom-[64px] left-0 right-0 px-4 pb-4 bg-white/95 backdrop-blur-md border-t border-slate-100 pt-3">
+      <div className="fixed bottom-[64px] left-0 right-0 px-4 pb-4 glass border-t border-warm-200 pt-3">
         <div className="max-w-lg mx-auto">
           <button
             onClick={() => navigate(`/schedule?propertyId=${property.id}`)}

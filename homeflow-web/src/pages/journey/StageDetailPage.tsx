@@ -1,15 +1,36 @@
+import { useRef, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, CheckCircle2, Circle, Upload } from 'lucide-react';
 import { useJourneyStore } from '@/store/journeyStore';
-import { JOURNEY_STAGES } from '@homeflow/shared';
-import type { JourneyStage } from '@homeflow/shared';
+import { useAuthStore } from '@/store/authStore';
+import { JOURNEY_STAGES } from '@/constants';
+import type { JourneyStage } from '@/types';
 import { cn } from '@/utils/cn';
+import { supabase } from '@/lib/supabase';
 import toast from 'react-hot-toast';
 
 export default function StageDetailPage() {
   const { stage } = useParams<{ stage: JourneyStage }>();
   const navigate = useNavigate();
   const { pipeline, completeTask, uploadDocument, advanceStage } = useJourneyStore();
+  const { user } = useAuthStore();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [uploadingDocId, setUploadingDocId] = useState<string | null>(null);
+
+  const handleUpload = async (docId: string, file: File) => {
+    if (!user) return;
+    setUploadingDocId(docId);
+    const path = `documents/${user.id}/${stage}/${docId}-${file.name}`;
+    const { error } = await supabase.storage.from('homeflow-docs').upload(path, file, { upsert: true });
+    setUploadingDocId(null);
+    if (error) {
+      toast.error('Upload failed. Please try again.');
+      return;
+    }
+    const { data: { publicUrl } } = supabase.storage.from('homeflow-docs').getPublicUrl(path);
+    await uploadDocument(stage!, docId, publicUrl);
+    toast.success('Document uploaded!');
+  };
 
   const stageInfo = JOURNEY_STAGES.find((s) => s.stage === stage);
   const stageData = pipeline?.stages.find((s) => s.stage === stage);
@@ -39,7 +60,7 @@ export default function StageDetailPage() {
   return (
     <div className="px-4 pt-4 pb-8 space-y-6">
       <div className="flex items-center gap-3">
-        <button onClick={() => navigate(-1)} className="p-2 hover:bg-slate-100 rounded-xl">
+        <button onClick={() => navigate(-1)} className="p-2 hover:bg-warm-100 rounded-xl">
           <ArrowLeft size={18} />
         </button>
         <div>
@@ -61,7 +82,7 @@ export default function StageDetailPage() {
                 'flex items-start gap-3 p-4 rounded-2xl border transition-all',
                 task.completed
                   ? 'bg-green-50 border-green-100'
-                  : 'bg-white border-slate-200',
+                  : 'bg-warm-50 border-warm-200',
               )}
             >
               <button
@@ -82,13 +103,13 @@ export default function StageDetailPage() {
                     task.completed ? 'text-slate-500 line-through' : 'text-slate-900',
                   )}
                 >
-                  {task.label}
+                  {task.title}
                 </p>
                 {task.description && (
                   <p className="text-xs text-slate-500 mt-0.5">{task.description}</p>
                 )}
                 {task.assignedTo && (
-                  <span className="badge bg-slate-100 text-slate-600 text-[10px] mt-1">
+                  <span className="badge bg-warm-100 text-slate-600 text-[10px] mt-1">
                     {task.assignedTo}
                   </span>
                 )}
@@ -104,13 +125,13 @@ export default function StageDetailPage() {
           <h2 className="font-semibold text-slate-800 mb-3">Documents</h2>
           <div className="space-y-2">
             {stageData.documents.map((doc) => (
-              <div key={doc.id} className="flex items-center gap-3 p-4 rounded-2xl bg-white border border-slate-200">
+              <div key={doc.id} className="flex items-center gap-3 p-4 rounded-2xl bg-warm-50 border border-warm-200">
                 <div
                   className={cn(
                     'w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0',
                     doc.status === 'uploaded' || doc.status === 'verified'
                       ? 'bg-green-100'
-                      : 'bg-slate-100',
+                      : 'bg-warm-100',
                   )}
                 >
                   <Upload
@@ -127,15 +148,26 @@ export default function StageDetailPage() {
                   <p className="text-xs text-slate-500 capitalize">{doc.status}</p>
                 </div>
                 {doc.status === 'missing' && (
-                  <button
-                    onClick={() => {
-                      uploadDocument(stage!, doc.id, 'mock-url');
-                      toast.success('Document uploaded!');
-                    }}
-                    className="text-xs font-semibold text-brand-600 hover:text-brand-700"
-                  >
-                    Upload
-                  </button>
+                  <>
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      className="hidden"
+                      accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) handleUpload(doc.id, file);
+                        e.target.value = '';
+                      }}
+                    />
+                    <button
+                      onClick={() => fileInputRef.current?.click()}
+                      disabled={uploadingDocId === doc.id}
+                      className="text-xs font-semibold text-brand-600 hover:text-brand-700 disabled:opacity-50"
+                    >
+                      {uploadingDocId === doc.id ? 'Uploading…' : 'Upload'}
+                    </button>
+                  </>
                 )}
               </div>
             ))}

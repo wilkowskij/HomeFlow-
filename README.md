@@ -141,3 +141,16 @@ All AI responses are tuned for NJ buyers (commute to NYC, NJ Transit, school dis
 2. PR title: `feat/`, `fix/`, `chore/`
 3. CI must pass
 4. Squash merge to `develop`, then PR to `main` for releases
+
+
+Step	What changed
+1 – Install	@supabase/supabase-js ^2.106.1 added, .env.local created with your key
+2 – Client + types	src/lib/supabase.ts (singleton client), src/types/database.ts (all 8 table shapes)
+3 – Auth	authStore — real Google/Apple OAuth + email sign-up/sign-in; WelcomePage inline email form; App.tsx initializes session on mount and shows a loading screen
+4 – buyer_profiles	ProfileSetupPage.handleComplete upserts to Supabase on onboarding finish; authStore.initialize reads it back on every sign-in to set hasCompletedOnboarding
+5/6/7 – Properties + saved homes + AI insights	src/lib/mappers.ts maps DB rows to app types; src/hooks/useProperties.ts (React Query) replaces all MOCK_PROPERTIES in SearchPage, DashboardPage, PropertyDetailPage, ComparePage; searchStore save/unsave writes to saved_homes and loads on auth
+8 – Journey	journeyStore stores stage_data as JSON in journey_pipelines; all task/doc/stage mutations persist to Supabase
+9 – Appointments	scheduleStore fetches from viewing_appointments, inserts/cancels/rates via Supabase
+10 – Chat	chatStore loads last 100 messages on mount, persists user + assistant turns to chat_messages
+11 – Storage	StageDetailPage Upload button opens a file picker and uploads to the homeflow-docs storage bucket
+One thing to do in Supabase Dashboard: create a public storage bucket named homeflow-docs (Storage → New bucket → name: homeflow-docs, public: on) so document uploads work.

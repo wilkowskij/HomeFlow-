@@ -1,5 +1,10 @@
+import { useEffect } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuthStore } from '@/store/authStore';
+import { useSearchStore } from '@/store/searchStore';
+import { useJourneyStore } from '@/store/journeyStore';
+import { useScheduleStore } from '@/store/scheduleStore';
+import { useChatStore } from '@/store/chatStore';
 
 // Layout
 import AppLayout from '@/components/layout/AppLayout';
@@ -34,8 +39,37 @@ function PrivateRoute({ children }: { children: React.ReactNode }) {
   return isAuthenticated ? <>{children}</> : <Navigate to="/welcome" replace />;
 }
 
+function AuthLoader() {
+  return (
+    <div className="min-h-[100dvh] flex items-center justify-center bg-warm-50">
+      <div className="flex flex-col items-center gap-4">
+        <div className="w-12 h-12 rounded-2xl gradient-brand flex items-center justify-center shadow-float animate-pulse" />
+        <p className="text-sm text-slate-400 font-medium">Loading…</p>
+      </div>
+    </div>
+  );
+}
+
 export default function App() {
-  const { isAuthenticated, hasCompletedOnboarding } = useAuthStore();
+  const { isAuthenticated, hasCompletedOnboarding, isLoading, initialize, user } = useAuthStore();
+  const { fetchSavedHomes } = useSearchStore();
+  const { fetchPipeline } = useJourneyStore();
+  const { fetchAppointments } = useScheduleStore();
+  const { fetchMessages } = useChatStore();
+
+  useEffect(() => {
+    initialize();
+  }, [initialize]);
+
+  useEffect(() => {
+    if (!user?.id) return;
+    fetchSavedHomes(user.id);
+    fetchPipeline(user.id);
+    fetchAppointments(user.id);
+    fetchMessages(user.id);
+  }, [user?.id, fetchSavedHomes, fetchPipeline, fetchAppointments, fetchMessages]);
+
+  if (isLoading) return <AuthLoader />;
 
   return (
     <Routes>
@@ -45,7 +79,9 @@ export default function App() {
         element={
           isAuthenticated && hasCompletedOnboarding
             ? <Navigate to="/dashboard" replace />
-            : <WelcomePage />
+            : isAuthenticated
+              ? <Navigate to="/onboarding" replace />
+              : <WelcomePage />
         }
       />
       <Route path="/onboarding" element={<ProfileSetupPage />} />
@@ -82,12 +118,7 @@ export default function App() {
       {/* Root redirect */}
       <Route
         path="/"
-        element={
-          <Navigate
-            to={isAuthenticated ? '/dashboard' : '/welcome'}
-            replace
-          />
-        }
+        element={<Navigate to={isAuthenticated ? '/dashboard' : '/welcome'} replace />}
       />
 
       {/* 404 */}

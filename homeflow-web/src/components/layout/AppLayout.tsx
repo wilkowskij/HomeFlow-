@@ -27,22 +27,22 @@ export default function AppLayout() {
   const isActive = (path: string) => location.pathname.startsWith(path);
 
   return (
-    <div className="flex flex-col min-h-[100dvh] bg-slate-50">
+    <div className="flex flex-col min-h-[100dvh] bg-warm-50">
       {/* Top bar */}
-      <header className="sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-slate-100 px-4 pt-safe">
+      <header className="sticky top-0 z-30 glass border-b border-warm-200 px-4 pt-safe">
         <div className="flex items-center justify-between h-14 max-w-lg mx-auto">
           <button onClick={() => navigate('/dashboard')} className="flex items-center gap-2">
             <div className="w-7 h-7 rounded-lg gradient-brand flex items-center justify-center">
               <Home size={14} className="text-white" />
             </div>
-            <span className="font-display font-bold text-lg text-slate-900 tracking-tight">
+            <span className="font-display font-bold text-lg text-[#2c2c2c] tracking-tight">
               HomeFlow
             </span>
           </button>
 
           <div className="flex items-center gap-2">
-            <button className="relative p-2 rounded-xl hover:bg-slate-100 transition-colors">
-              <Bell size={20} className="text-slate-600" />
+            <button className="relative p-2 rounded-xl hover:bg-warm-100 transition-colors">
+              <Bell size={20} className="text-[#5c5c5c]" />
               {/* Notification dot */}
               <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-brand-500 rounded-full" />
             </button>
@@ -64,7 +64,7 @@ export default function AppLayout() {
       </main>
 
       {/* Bottom navigation */}
-      <nav className="fixed bottom-0 left-0 right-0 z-30 bg-white/90 backdrop-blur-md border-t border-slate-100 pb-safe">
+      <nav className="fixed bottom-0 left-0 right-0 z-30 glass border-t border-warm-200 pb-safe">
         <div className="flex items-center max-w-lg mx-auto px-2 h-16">
           {NAV_ITEMS.map(({ path, icon: Icon, label }) => {
             const active = isActive(path);
@@ -78,7 +78,7 @@ export default function AppLayout() {
                   'flex flex-col items-center justify-center flex-1 gap-0.5 py-2 rounded-xl transition-all duration-200',
                   active
                     ? 'text-brand-600'
-                    : 'text-slate-400 hover:text-slate-600',
+                    : 'text-[#b8b2a6] hover:text-[#5c5c5c]',
                 )}
               >
                 <div className="relative">

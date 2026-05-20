@@ -3,9 +3,19 @@ import { useNavigate } from 'react-router-dom';
 import { ArrowRight, ArrowLeft, Check, MapPin, DollarSign, Home, Clock } from 'lucide-react';
 import { useAuthStore } from '@/store/authStore';
 import { useJourneyStore } from '@/store/journeyStore';
-import type { BuyerProfile, BuyingTimeline, PropertyType } from '@homeflow/shared';
-import { TIMELINE_LABELS } from '@homeflow/shared';
+import type { BuyerProfile, BuyingTimeline, PropertyType } from '@/types';
+import { TIMELINE_LABELS } from '@/constants';
 import { cn } from '@/utils/cn';
+import { supabase } from '@/lib/supabase';
+import type { DbPropertyType } from '@/types/database';
+
+const APP_TO_DB_PROPERTY_TYPE: Record<PropertyType, DbPropertyType> = {
+  'single-family': 'SINGLE_FAMILY',
+  townhouse: 'TOWNHOUSE',
+  condo: 'CONDO',
+  'multi-family': 'MULTI_FAMILY',
+  land: 'LAND',
+};
 
 const TOTAL_STEPS = 4;
 
@@ -41,7 +51,7 @@ export default function ProfileSetupPage() {
     requiresYard: false,
   });
 
-  const goNext = () => {
+  const goNext = async () => {
     if (step < TOTAL_STEPS) setStep((s) => s + 1);
     else handleComplete();
   };
@@ -50,7 +60,7 @@ export default function ProfileSetupPage() {
     if (step > 1) setStep((s) => s - 1);
   };
 
-  const handleComplete = () => {
+  const handleComplete = async () => {
     if (!user) return;
     const profile: BuyerProfile = {
       userId: user.id,
@@ -69,9 +79,23 @@ export default function ProfileSetupPage() {
       },
       preApprovalStatus: 'none',
     };
+
+    await supabase.from('buyer_profiles').upsert({
+      user_id: user.id,
+      locations: form.locations,
+      budget_min: form.budgetMin,
+      budget_max: form.budgetMax,
+      timeline: form.timeline,
+      bedrooms_min: form.bedsMin,
+      bathrooms_min: form.bathsMin,
+      property_types: form.propertyTypes.map((t) => APP_TO_DB_PROPERTY_TYPE[t]),
+      must_haves: form.mustHaves,
+      pre_approval_status: 'NONE',
+    }, { onConflict: 'user_id' });
+
     setProfile(profile);
     setOnboardingComplete();
-    initPipeline(user.id);
+    await initPipeline(user.id);
     navigate('/dashboard');
   };
 
@@ -94,7 +118,7 @@ export default function ProfileSetupPage() {
   };
 
   return (
-    <div className="min-h-[100dvh] flex flex-col bg-white">
+    <div className="min-h-[100dvh] flex flex-col bg-warm-50">
       {/* Header */}
       <div className="px-6 pt-12 pb-6">
         {step > 1 && (
@@ -235,7 +259,7 @@ export default function ProfileSetupPage() {
                         'p-3 rounded-xl border-2 text-sm font-medium text-left transition-all',
                         form.timeline === val
                           ? 'border-brand-500 bg-brand-50 text-brand-700'
-                          : 'border-slate-200 text-slate-600 hover:border-slate-300',
+                          : 'border-warm-200 text-slate-600 hover:border-slate-300',
                       )}
                     >
                       {label}
@@ -292,7 +316,7 @@ export default function ProfileSetupPage() {
                         'p-3 rounded-xl border-2 text-sm font-medium transition-all flex items-center gap-2',
                         form.propertyTypes.includes(value)
                           ? 'border-brand-500 bg-brand-50 text-brand-700'
-                          : 'border-slate-200 text-slate-600 hover:border-slate-300',
+                          : 'border-warm-200 text-slate-600 hover:border-slate-300',
                       )}
                     >
                       {form.propertyTypes.includes(value) && (
@@ -344,7 +368,7 @@ export default function ProfileSetupPage() {
               ].map(({ value, label, desc }) => (
                 <button
                   key={value}
-                  className="w-full p-4 rounded-2xl border-2 border-slate-200 hover:border-brand-300 text-left transition-all"
+                  className="w-full p-4 rounded-2xl border-2 border-warm-200 hover:border-brand-300 text-left transition-all"
                 >
                   <p className="font-semibold text-slate-900">{label}</p>
                   <p className="text-sm text-slate-500 mt-0.5">{desc}</p>

@@ -4,7 +4,7 @@ import { useChatStore } from '@/store/chatStore';
 import { useJourneyStore } from '@/store/journeyStore';
 import { useAuthStore } from '@/store/authStore';
 import { cn } from '@/utils/cn';
-import { JOURNEY_STAGES } from '@homeflow/shared';
+import { JOURNEY_STAGES } from '@/constants';
 import { format } from 'date-fns';
 
 const QUICK_SUGGESTIONS = [
@@ -53,7 +53,7 @@ export default function ChatPage() {
     const userMsg = text.trim();
     setInput('');
 
-    addMessage({ role: 'user', content: userMsg });
+    addMessage({ role: 'user', content: userMsg }, user?.id);
     setLoading(true);
 
     // Build context for AI
@@ -92,12 +92,12 @@ export default function ChatPage() {
           { id: 'more', label: 'Tell me more', action: 'send_message', payload: { message: 'Can you explain more?' } },
           { id: 'next', label: 'What\'s next?', action: 'send_message', payload: { message: 'What should I do next in my home buying journey?' } },
         ],
-      });
+      }, user?.id);
     } catch {
       addMessage({
         role: 'assistant',
         content: 'I\'m having trouble connecting right now. Please try again in a moment.',
-      });
+      }, user?.id);
     } finally {
       setLoading(false);
     }
@@ -112,7 +112,7 @@ export default function ChatPage() {
   return (
     <div className="flex flex-col h-[calc(100dvh-128px)]">
       {/* Header */}
-      <div className="px-4 pt-4 pb-3 border-b border-slate-100 flex items-center justify-between">
+      <div className="px-4 pt-4 pb-3 border-b border-warm-200 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-full gradient-brand flex items-center justify-center">
             <Sparkles size={15} className="text-white" />
@@ -123,8 +123,8 @@ export default function ChatPage() {
           </div>
         </div>
         <button
-          onClick={clearMessages}
-          className="p-2 hover:bg-slate-100 rounded-xl transition-colors"
+          onClick={() => clearMessages(user?.id)}
+          className="p-2 hover:bg-warm-100 rounded-xl transition-colors"
           title="Clear chat"
         >
           <RotateCcw size={15} className="text-slate-400" />
@@ -155,7 +155,7 @@ export default function ChatPage() {
                 'max-w-[85%] rounded-2xl px-4 py-3',
                 msg.role === 'user'
                   ? 'bg-brand-600 text-white rounded-br-sm'
-                  : 'bg-white border border-slate-200 text-slate-900 rounded-bl-sm shadow-sm',
+                  : 'bg-warm-50 border border-warm-200 text-[#2c2c2c] rounded-bl-sm shadow-sm',
               )}
             >
               <p className="text-sm leading-relaxed whitespace-pre-wrap">{msg.content}</p>
@@ -170,7 +170,7 @@ export default function ChatPage() {
 
               {/* Quick actions */}
               {msg.role === 'assistant' && msg.quickActions && msg.quickActions.length > 0 && (
-                <div className="flex flex-wrap gap-1.5 mt-3 pt-3 border-t border-slate-100">
+                <div className="flex flex-wrap gap-1.5 mt-3 pt-3 border-t border-warm-200">
                   {msg.quickActions.map((action) => (
                     <button
                       key={action.id}
@@ -190,12 +190,12 @@ export default function ChatPage() {
         {/* Typing indicator */}
         {isLoading && (
           <div className="flex justify-start animate-fade-in">
-            <div className="bg-white border border-slate-200 rounded-2xl rounded-bl-sm px-4 py-3 shadow-sm">
+            <div className="bg-warm-50 border border-warm-200 rounded-2xl rounded-bl-sm px-4 py-3 shadow-sm">
               <div className="flex gap-1 items-center h-4">
                 {[0, 1, 2].map((i) => (
                   <div
                     key={i}
-                    className="w-1.5 h-1.5 rounded-full bg-slate-300 animate-bounce"
+                    className="w-1.5 h-1.5 rounded-full bg-warm-300 animate-bounce"
                     style={{ animationDelay: `${i * 0.15}s` }}
                   />
                 ))}
@@ -212,7 +212,7 @@ export default function ChatPage() {
               <button
                 key={s}
                 onClick={() => sendMessage(s)}
-                className="block w-full text-left p-3 rounded-xl border border-slate-200 text-sm text-slate-700 hover:border-brand-300 hover:bg-brand-50 transition-all"
+                className="block w-full text-left p-3 rounded-xl border border-warm-200 text-sm text-[#5c5c5c] hover:border-brand-300 hover:bg-brand-50 transition-all"
               >
                 {s}
               </button>
@@ -224,7 +224,7 @@ export default function ChatPage() {
       </div>
 
       {/* Input area */}
-      <div className="px-4 pb-4 pt-3 border-t border-slate-100 bg-white">
+      <div className="px-4 pb-4 pt-3 border-t border-warm-200 bg-warm-50">
         <div className="flex items-end gap-2">
           <textarea
             ref={inputRef}

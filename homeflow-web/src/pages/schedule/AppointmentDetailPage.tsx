@@ -49,10 +49,10 @@ export default function AppointmentDetailPage() {
       <div
         className={cn(
           'badge text-sm py-2 px-4 mb-5',
-          appt.status === 'confirmed' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700',
+          appt.status === 'CONFIRMED' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700',
         )}
       >
-        {appt.status === 'confirmed' ? '✓ Confirmed' : '⏳ Pending Confirmation'}
+        {appt.status === 'CONFIRMED' ? '✓ Confirmed' : '⏳ Pending Confirmation'}
       </div>
 
       {/* Details card */}

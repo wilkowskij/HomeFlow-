@@ -37,7 +37,7 @@ export default function ItineraryBuilderPage() {
   return (
     <div className="px-4 pt-4 pb-32">
       <div className="flex items-center gap-3 mb-5">
-        <button onClick={() => navigate(-1)} className="p-2 hover:bg-slate-100 rounded-xl">
+        <button onClick={() => navigate(-1)} className="p-2 hover:bg-warm-100 rounded-xl">
           <ArrowLeft size={18} />
         </button>
         <div>
@@ -70,7 +70,7 @@ export default function ItineraryBuilderPage() {
           </div>
 
           {/* Route preview */}
-          <div className="mt-3 p-3 rounded-xl bg-slate-50 flex items-center gap-2">
+          <div className="mt-3 p-3 rounded-xl bg-warm-50 flex items-center gap-2">
             <Route size={14} className="text-brand-500" />
             <p className="text-xs text-slate-600">
               <span className="font-semibold">Estimated tour:</span> ~2h 15min · 18 miles
@@ -107,7 +107,7 @@ export default function ItineraryBuilderPage() {
 
       {/* Fixed CTA */}
       {selectedProperties.length >= 2 && (
-        <div className="fixed bottom-[64px] left-0 right-0 px-4 pb-4 bg-white/95 backdrop-blur-md border-t border-slate-100 pt-3">
+        <div className="fixed bottom-[64px] left-0 right-0 px-4 pb-4 glass border-t border-warm-200 pt-3">
           <div className="max-w-lg mx-auto">
             <button onClick={handleOptimize} className="btn-primary w-full flex items-center justify-center gap-2">
               <Route size={17} />

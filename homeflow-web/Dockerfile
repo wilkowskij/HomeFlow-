@@ -2,12 +2,9 @@ FROM node:20-alpine AS base
 WORKDIR /app
 RUN npm install -g pnpm
 
-FROM base AS deps
-COPY package.json pnpm-lock.yaml* ./
-RUN pnpm install --frozen-lockfile
-
 FROM base AS builder
-COPY --from=deps /app/node_modules ./node_modules
+COPY package.json .npmrc ./
+RUN pnpm install
 COPY . .
 ARG VITE_API_URL=http://localhost:3001/api
 ARG VITE_AI_SERVICE_URL=http://localhost:8000/api

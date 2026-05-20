@@ -1,18 +1,12 @@
 import { useNavigate } from 'react-router-dom';
 import { UserPlus, ChevronRight, TrendingUp } from 'lucide-react';
 import { useJourneyStore } from '@/store/journeyStore';
-import { useAuthStore } from '@/store/authStore';
 import PipelineProgress from '@/components/common/PipelineProgress';
-import { JOURNEY_STAGES } from '@homeflow/shared';
+import { JOURNEY_STAGES } from '@/constants';
 
 export default function JourneyPage() {
   const navigate = useNavigate();
-  const { user } = useAuthStore();
-  const { pipeline, initPipeline, getCompletionPercent } = useJourneyStore();
-
-  if (!pipeline && user) {
-    initPipeline(user.id);
-  }
+  const { pipeline, getCompletionPercent } = useJourneyStore();
 
   if (!pipeline) {
     return (
@@ -64,10 +58,10 @@ export default function JourneyPage() {
               <button
                 key={task.id}
                 onClick={() => navigate(`/journey/stage/${pipeline.currentStage}`)}
-                className="w-full flex items-center gap-3 p-4 rounded-2xl bg-white border border-slate-200 hover:border-brand-300 transition-all text-left"
+                className="w-full flex items-center gap-3 p-4 rounded-2xl bg-warm-50 border border-warm-200 hover:border-brand-300 transition-all text-left"
               >
                 <div className="w-2 h-2 rounded-full bg-brand-500 flex-shrink-0" />
-                <span className="text-sm text-slate-800 flex-1">{task.label}</span>
+                <span className="text-sm text-slate-800 flex-1">{task.title}</span>
                 <ChevronRight size={15} className="text-slate-400" />
               </button>
             ))}
@@ -87,8 +81,8 @@ export default function JourneyPage() {
           onClick={() => navigate('/journey/connect-agent')}
           className="w-full card p-4 flex items-center gap-4 hover:shadow-card-hover transition-shadow text-left"
         >
-          <div className="w-12 h-12 rounded-2xl bg-emerald-100 flex items-center justify-center flex-shrink-0">
-            <UserPlus size={22} className="text-emerald-600" />
+          <div className="w-12 h-12 rounded-2xl bg-brand-100 flex items-center justify-center flex-shrink-0">
+            <UserPlus size={22} className="text-brand-600" />
           </div>
           <div className="flex-1">
             <p className="font-semibold text-slate-900">Connect with an Agent</p>

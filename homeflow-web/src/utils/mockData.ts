@@ -1,4 +1,4 @@
-import type { Property } from '@homeflow/shared';
+import type { Property } from '../types';
 
 export const MOCK_PROPERTIES: Property[] = [
   {
