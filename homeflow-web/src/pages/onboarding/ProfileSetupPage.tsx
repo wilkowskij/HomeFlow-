@@ -54,7 +54,7 @@ export default function ProfileSetupPage() {
 
   const goNext = async () => {
     if (step < TOTAL_STEPS) setStep((s) => s + 1);
-    else handleComplete();
+    else await handleComplete();
   };
 
   const goPrev = () => {

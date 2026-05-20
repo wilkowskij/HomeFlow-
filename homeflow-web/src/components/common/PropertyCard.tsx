@@ -1,5 +1,6 @@
 import { Heart, Calendar, BedDouble, Bath, Maximize2, Star } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import toast from 'react-hot-toast';
 import type { Property } from '@/types';
 import { cn, formatCurrency, formatSqft, relativeTime } from '@/utils/cn';
 import { useSearchStore } from '@/store/searchStore';
@@ -25,7 +26,10 @@ export default function PropertyCard({
 
   const handleSave = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (!user) return;
+    if (!user) {
+      toast.error('Sign in to save homes');
+      return;
+    }
     if (saved) {
       unsaveHome(property.id, user.id);
     } else {

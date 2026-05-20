@@ -80,9 +80,19 @@ export default function ItineraryBuilderPage() {
 
       {/* Available homes */}
       <div>
-        <h2 className="text-sm font-semibold text-slate-700 mb-3">
-          {savedHomes.length > 0 ? 'Your saved homes' : 'Recommended homes'}
-        </h2>
+        <h2 className="text-sm font-semibold text-slate-700 mb-3">Your saved homes</h2>
+        {availableToAdd.length === 0 && savedHomes.length === 0 ? (
+          <div className="text-center py-12">
+            <p className="text-slate-500 font-medium">No saved homes yet</p>
+            <p className="text-sm text-slate-400 mt-1">Save homes from Search to build a tour.</p>
+            <button
+              onClick={() => navigate('/search')}
+              className="btn-primary mt-4 text-sm"
+            >
+              Browse Homes
+            </button>
+          </div>
+        ) : (
         <div className="space-y-3">
           {availableToAdd.map((p) => (
             <div key={p.id} className="relative">
@@ -102,6 +112,7 @@ export default function ItineraryBuilderPage() {
             </div>
           ))}
         </div>
+        )}
       </div>
 
       {/* Fixed CTA */}

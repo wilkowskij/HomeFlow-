@@ -37,6 +37,7 @@ export default function WelcomePage() {
   const handleEmailSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+    setError(null);
     setSubmitting(true);
 
     const err =
