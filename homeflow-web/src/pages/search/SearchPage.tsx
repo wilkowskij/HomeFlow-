@@ -4,7 +4,6 @@ import PropertyCard from '@/components/common/PropertyCard';
 import { useSearchStore } from '@/store/searchStore';
 import { cn, debounce } from '@/utils/cn';
 import { MOCK_PROPERTIES } from '@/utils/mockData';
-import type { PropertyType } from '@homeflow/shared';
 
 type ViewMode = 'list' | 'map';
 
@@ -19,7 +18,7 @@ export default function SearchPage() {
   const [viewMode, setViewMode] = useState<ViewMode>('list');
   const [showFilters, setShowFilters] = useState(false);
   const [localQuery, setLocalQuery] = useState('');
-  const { filters, setFilters, savedHomes } = useSearchStore();
+  const { filters, setFilters } = useSearchStore();
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const debouncedSearch = useCallback(

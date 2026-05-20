@@ -46,7 +46,7 @@ router.post('/', async (req: Request, res: Response) => {
       })),
     });
 
-    const textContent = response.content.find((c) => c.type === 'text');
+    const textContent = (response.content as any).find((c: any) => c.type === 'text');
     res.json({
       success: true,
       data: {
@@ -87,7 +87,7 @@ router.post('/stream', async (req: Request, res: Response) => {
       messages,
     });
 
-    stream.on('text', (text) => {
+    stream.on('text', (text: string) => {
       res.write(`data: ${JSON.stringify({ type: 'text', text })}\n\n`);
     });
 
@@ -96,7 +96,7 @@ router.post('/stream', async (req: Request, res: Response) => {
       res.end();
     });
 
-    stream.on('error', (err) => {
+    stream.on('error', (err: any) => {
       res.write(`data: ${JSON.stringify({ type: 'error', error: err.message })}\n\n`);
       res.end();
     });
@@ -119,14 +119,14 @@ router.get('/suggestions', async (req: Request, res: Response) => {
     SEARCHING: [
       'How many homes should I tour before making an offer?',
       'Should I expand my search area?',
-      'What's the NJ market like right now?',
+      "What's the NJ market like right now?",
       'Help me compare my saved homes',
     ],
     OFFER_SUBMITTED: [
       'What happens after my offer is accepted?',
       'Should I waive contingencies?',
       'How long does the NJ closing process take?',
-      'What's earnest money and how much do I need?',
+      "What's earnest money and how much do I need?",
     ],
     default: [
       'Where am I in the home buying process?',

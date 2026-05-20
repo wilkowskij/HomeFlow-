@@ -1,4 +1,4 @@
-import { CheckCircle2, Circle, Lock } from 'lucide-react';
+import { CheckCircle2, Lock } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { JOURNEY_STAGES } from '@homeflow/shared';
 import type { JourneyPipeline } from '@homeflow/shared';

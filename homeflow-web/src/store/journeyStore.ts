@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { JourneyPipeline, JourneyStage, JourneyTask } from '@homeflow/shared';
+import type { JourneyPipeline, JourneyStage } from '@homeflow/shared';
 import { JOURNEY_STAGES } from '@homeflow/shared';
 
 interface JourneyState {

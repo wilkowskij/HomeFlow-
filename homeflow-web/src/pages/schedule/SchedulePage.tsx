@@ -1,5 +1,5 @@
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { Calendar, Plus, Clock, MapPin, ChevronRight, Route } from 'lucide-react';
+import { Calendar, Plus, Clock, ChevronRight, Route } from 'lucide-react';
 import { useScheduleStore } from '@/store/scheduleStore';
 import { format } from 'date-fns';
 import { cn } from '@/utils/cn';

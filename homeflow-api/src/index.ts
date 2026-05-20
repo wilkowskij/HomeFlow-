@@ -9,9 +9,9 @@ import rateLimit from 'express-rate-limit';
 import { authRouter } from './routes/auth';
 import { propertiesRouter } from './routes/properties';
 import { scheduleRouter } from './routes/schedule';
-import { journeyRouter } from './routes/journey';
-import { chatRouter } from './routes/chat';
-import { usersRouter } from './routes/users';
+import journeyRouter from './routes/journey';
+import chatRouter from './routes/chat';
+import usersRouter from './routes/users';
 import { errorHandler } from './middleware/errorHandler';
 import { logger } from './config/logger';
 

@@ -1,5 +1,5 @@
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, CheckCircle2, Circle, Upload, ChevronRight } from 'lucide-react';
+import { ArrowLeft, CheckCircle2, Circle, Upload } from 'lucide-react';
 import { useJourneyStore } from '@/store/journeyStore';
 import { JOURNEY_STAGES } from '@homeflow/shared';
 import type { JourneyStage } from '@homeflow/shared';

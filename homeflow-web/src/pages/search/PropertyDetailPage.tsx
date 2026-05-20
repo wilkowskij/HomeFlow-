@@ -1,7 +1,7 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import {
   ArrowLeft, Heart, Share2, Calendar, BedDouble, Bath,
-  Maximize2, Star, MapPin, TrendingUp, School, ChevronRight,
+  Maximize2, Star, MapPin, TrendingUp, School,
   Sparkles,
 } from 'lucide-react';
 import { useSearchStore } from '@/store/searchStore';

@@ -5,7 +5,7 @@ import { useAuthStore } from '@/store/authStore';
 import { useJourneyStore } from '@/store/journeyStore';
 import type { BuyerProfile, BuyingTimeline, PropertyType } from '@homeflow/shared';
 import { TIMELINE_LABELS } from '@homeflow/shared';
-import { cn, generateId } from '@/utils/cn';
+import { cn } from '@/utils/cn';
 
 const TOTAL_STEPS = 4;
 

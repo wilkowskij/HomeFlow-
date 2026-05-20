@@ -4,7 +4,13 @@ import { useSearchStore } from '@/store/searchStore';
 import { MOCK_PROPERTIES } from '@/utils/mockData';
 import { formatCurrency, formatSqft } from '@/utils/cn';
 
-const COMPARE_FIELDS = [
+type CompareFieldKey = 'price' | 'beds' | 'baths' | 'sqft' | 'yearBuilt';
+
+const COMPARE_FIELDS: Array<{
+  key: CompareFieldKey;
+  label: string;
+  format: (value: unknown) => string;
+}> = [
   { key: 'price', label: 'Price', format: (v: unknown) => formatCurrency(v as number) },
   { key: 'beds', label: 'Bedrooms', format: (v: unknown) => `${v} bd` },
   { key: 'baths', label: 'Bathrooms', format: (v: unknown) => `${v} ba` },
@@ -71,7 +77,7 @@ export default function ComparePage() {
             {properties.map((p) => (
               <div key={p.id} className="p-3 flex items-center">
                 <span className="text-sm font-medium text-slate-900">
-                  {format((p as Record<string, unknown>)[key])}
+                  {format(p[key])}
                 </span>
               </div>
             ))}

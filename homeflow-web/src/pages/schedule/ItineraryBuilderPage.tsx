@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Plus, Route, X, MapPin, Clock } from 'lucide-react';
+import { ArrowLeft, Plus, Route, X } from 'lucide-react';
 import { useSearchStore } from '@/store/searchStore';
 import { useScheduleStore } from '@/store/scheduleStore';
 import PropertyCard from '@/components/common/PropertyCard';

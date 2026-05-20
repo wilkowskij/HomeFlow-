@@ -32,7 +32,7 @@ export default function DashboardPage() {
         <p className="text-slate-500 text-sm mt-1">
           {profile?.locations[0]
             ? `Searching in ${profile.locations[0]}`
-            : 'Let's find your perfect home'}
+            : "Let's find your perfect home"}
         </p>
       </div>
 

@@ -49,7 +49,7 @@ export function clamp(value: number, min: number, max: number): number {
 }
 
 /** Debounce a function */
-export function debounce<T extends (...args: unknown[]) => void>(
+export function debounce<T extends (...args: any[]) => void>(
   fn: T,
   delay: number,
 ): (...args: Parameters<T>) => void {

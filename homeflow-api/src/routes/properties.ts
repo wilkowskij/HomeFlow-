@@ -1,4 +1,4 @@
-import { Router } from 'express';
+import { Router, Request, Response } from 'express';
 import { query, param } from 'express-validator';
 import { authenticate } from '../middleware/authenticate';
 import { validate } from '../middleware/validate';
@@ -18,7 +18,7 @@ propertiesRouter.get(
     query('pageSize').optional().isInt({ min: 1, max: 50 }),
   ],
   validate,
-  async (req, res) => {
+  async (req: Request, res: Response) => {
     // TODO: query MLS data source / database
     res.json({
       success: true,
@@ -35,7 +35,7 @@ propertiesRouter.get(
 propertiesRouter.get(
   '/recommendations',
   authenticate,
-  async (_req, res) => {
+  async (_req: Request, res: Response) => {
     // TODO: call AI service for personalized recommendations
     res.json({ success: true, data: [] });
   },
@@ -46,7 +46,7 @@ propertiesRouter.get(
   '/:id',
   [param('id').isString()],
   validate,
-  async (req, res) => {
+  async (req: Request, res: Response) => {
     const { id } = req.params;
     // TODO: fetch from database
     res.json({ success: true, data: { id } });
@@ -58,7 +58,7 @@ propertiesRouter.get(
   '/:id/availability',
   [param('id').isString()],
   validate,
-  async (req, res) => {
+  async (req: Request, res: Response) => {
     const { id } = req.params;
     // TODO: fetch slots from calendar integration
     res.json({ success: true, data: [] });
@@ -70,7 +70,7 @@ propertiesRouter.get(
   '/:id/neighborhood',
   [param('id').isString()],
   validate,
-  async (req, res) => {
+  async (req: Request, res: Response) => {
     res.json({ success: true, data: {} });
   },
 );

@@ -25,7 +25,7 @@ export default function WelcomePage() {
   const navigate = useNavigate();
   const { setUser } = useAuthStore();
 
-  const handleSignIn = (method: 'google' | 'apple' | 'email') => {
+  const handleSignIn = () => {
     // TODO: implement real OAuth flow
     setUser({
       id: generateId('user'),
@@ -88,7 +88,7 @@ export default function WelcomePage() {
       {/* CTAs */}
       <div className="px-6 pb-10 space-y-3">
         <button
-          onClick={() => handleSignIn('google')}
+          onClick={handleSignIn}
           className="w-full flex items-center justify-center gap-3 py-3.5 rounded-2xl border-2 border-slate-200 bg-white hover:bg-slate-50 transition-colors font-semibold text-slate-700"
         >
           <img src="/google-icon.svg" alt="Google" className="w-5 h-5" />
@@ -96,7 +96,7 @@ export default function WelcomePage() {
         </button>
 
         <button
-          onClick={() => handleSignIn('apple')}
+          onClick={handleSignIn}
           className="w-full flex items-center justify-center gap-3 py-3.5 rounded-2xl bg-slate-900 hover:bg-slate-800 transition-colors font-semibold text-white"
         >
           <img src="/apple-icon.svg" alt="Apple" className="w-4 h-4 invert" />
@@ -104,7 +104,7 @@ export default function WelcomePage() {
         </button>
 
         <button
-          onClick={() => handleSignIn('email')}
+          onClick={handleSignIn}
           className="w-full btn-primary flex items-center justify-center gap-2"
         >
           Sign up with Email
