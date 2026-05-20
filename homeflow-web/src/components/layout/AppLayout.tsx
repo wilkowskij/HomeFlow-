@@ -35,7 +35,7 @@ export default function AppLayout() {
   const isActive = (path: string) => location.pathname.startsWith(path);
 
   return (
-    <div className="flex flex-col min-h-[100dvh] bg-warm-50">
+    <div className="flex flex-col min-h-[100dvh] bg-[#0F0F0F]">
       {/* Top bar */}
       <header className="sticky top-0 z-30 glass border-b border-warm-200 px-4 pt-safe">
         <div className="flex items-center justify-between h-14 max-w-lg mx-auto">
@@ -43,7 +43,7 @@ export default function AppLayout() {
             <div className="w-7 h-7 rounded-lg gradient-brand flex items-center justify-center">
               <Home size={14} className="text-white" />
             </div>
-            <span className="font-display font-bold text-lg text-[#2c2c2c] tracking-tight">
+            <span className="font-display font-bold text-lg text-white tracking-tight">
               HomeFlow
             </span>
           </button>
@@ -53,7 +53,7 @@ export default function AppLayout() {
               onClick={() => navigate('/chat')}
               className={cn(
                 'relative p-2 rounded-xl transition-colors',
-                location.pathname.startsWith('/chat') ? 'text-brand-600 bg-brand-50' : 'text-[#5c5c5c] hover:bg-warm-100',
+                location.pathname.startsWith('/chat') ? 'text-brand-600 bg-brand-50' : 'text-slate-400 hover:bg-warm-100',
               )}
             >
               <MessageCircle size={20} />
@@ -64,7 +64,7 @@ export default function AppLayout() {
             <div className="relative">
               <button
                 onClick={() => setShowNotifications((v) => !v)}
-                className="relative p-2 rounded-xl hover:bg-warm-100 transition-colors text-[#5c5c5c]"
+                className="relative p-2 rounded-xl hover:bg-warm-100 transition-colors text-slate-400"
               >
                 <Bell size={20} />
                 {hasAlerts && (
@@ -136,7 +136,7 @@ export default function AppLayout() {
                   'flex flex-col items-center justify-center flex-1 gap-0.5 py-2 rounded-xl transition-all duration-200',
                   active
                     ? 'text-brand-600'
-                    : 'text-[#b8b2a6] hover:text-[#5c5c5c]',
+                    : 'text-slate-500 hover:text-slate-400',
                 )}
               >
                 <div className="relative">

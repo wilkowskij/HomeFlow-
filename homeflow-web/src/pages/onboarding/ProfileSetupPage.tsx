@@ -129,7 +129,7 @@ export default function ProfileSetupPage() {
   };
 
   return (
-    <div className="min-h-[100dvh] flex flex-col bg-warm-50">
+    <div className="min-h-[100dvh] flex flex-col bg-[#0F0F0F]">
       {/* Header */}
       <div className="px-6 pt-12 pb-6">
         {step > 1 && (

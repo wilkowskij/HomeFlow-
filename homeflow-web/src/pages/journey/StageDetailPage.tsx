@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, CheckCircle2, Circle, Upload, Clock } from 'lucide-react';
+import { ArrowLeft, CheckCircle2, Circle, Upload, Clock, MessageCircle } from 'lucide-react';
 
 const STAGE_TYPICAL: Record<string, { label: string; tips: string[] }> = {
   PROFILE_PREAPPROVAL:      { label: '1–2 weeks', tips: ['Contact 2–3 lenders to compare rates', 'Gather pay stubs and tax returns in advance'] },
@@ -151,6 +151,15 @@ export default function StageDetailPage() {
                   </span>
                 )}
               </div>
+              {!task.completed && (
+                <button
+                  onClick={() => navigate(`/chat?task=${encodeURIComponent(task.title)}&stage=${stage}`)}
+                  className="flex-shrink-0 p-1.5 rounded-lg hover:bg-brand-100 transition-colors"
+                  title="Ask AI about this task"
+                >
+                  <MessageCircle size={14} className="text-brand-500" />
+                </button>
+              )}
             </div>
           ))}
         </div>
@@ -209,6 +218,48 @@ export default function StageDetailPage() {
               </div>
             ))}
           </div>
+        </div>
+      )}
+
+      {/* Stage-specific CTAs */}
+      {stage === 'PROFILE_PREAPPROVAL' && (
+        <button
+          onClick={() => navigate('/journey/pre-approval')}
+          className="w-full flex items-center gap-3 p-4 rounded-2xl border border-brand-500/30 bg-brand-100 hover:bg-brand-200 transition-colors text-left"
+        >
+          <span className="text-2xl">🏦</span>
+          <div className="flex-1">
+            <p className="font-semibold text-white text-sm">Pre-Approval Guide</p>
+            <p className="text-xs text-slate-400 mt-0.5">Lender recommendations, docs needed, timelines</p>
+          </div>
+          <MessageCircle size={16} className="text-brand-500" />
+        </button>
+      )}
+
+      {stage === 'OFFER_SUBMITTED' && (
+        <div className="card p-4 border border-brand-500/20">
+          <p className="font-semibold text-white mb-3">💰 Offer Strategy Tips</p>
+          <div className="space-y-2">
+            {[
+              'Offer 97–100% of asking price in competitive markets',
+              'Limit contingencies to make your offer cleaner',
+              'Shorten inspection window to 7 days if comfortable',
+              'Include an escalation clause up to your max budget',
+              'Write a personal letter to the seller',
+            ].map((tip, i) => (
+              <p key={i} className="text-xs text-slate-400 flex gap-2">
+                <span className="text-brand-500 font-bold flex-shrink-0">{i + 1}.</span>
+                {tip}
+              </p>
+            ))}
+          </div>
+          <button
+            onClick={() => navigate('/chat?task=help me write a competitive offer&stage=OFFER_SUBMITTED')}
+            className="w-full mt-3 flex items-center justify-center gap-2 py-2.5 rounded-xl border border-brand-500/40 text-brand-400 text-sm font-semibold hover:bg-brand-100 transition-colors"
+          >
+            <MessageCircle size={14} />
+            Ask AI to help craft my offer
+          </button>
         </div>
       )}
 

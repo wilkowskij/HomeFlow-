@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { Send, Sparkles, RotateCcw } from 'lucide-react';
 import { useChatStore } from '@/store/chatStore';
 import { useJourneyStore } from '@/store/journeyStore';
@@ -16,7 +17,10 @@ const QUICK_SUGGESTIONS = [
 ];
 
 export default function ChatPage() {
-  const [input, setInput] = useState('');
+  const [searchParams] = useSearchParams();
+  const taskParam = searchParams.get('task');
+  const stageParam = searchParams.get('stage');
+  const [input, setInput] = useState(taskParam ? `Help me with: ${taskParam}` : '');
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
@@ -131,11 +135,18 @@ export default function ChatPage() {
         </button>
       </div>
 
-      {/* Context banner */}
-      {currentStageInfo && (
-        <div className="px-4 py-2 bg-brand-50 border-b border-brand-100">
-          <p className="text-xs text-brand-700">
-            📍 Current stage: <span className="font-semibold">{currentStageInfo.label}</span>
+      {/* Context banner — journey task OR current stage */}
+      {taskParam ? (
+        <div className="px-4 py-2 bg-brand-100 border-b border-brand-200">
+          <p className="text-xs text-brand-400">
+            💬 Asking about: <span className="font-semibold text-brand-300">{taskParam}</span>
+            {stageParam && <span className="text-brand-500"> · {stageParam.replace(/_/g, ' ')}</span>}
+          </p>
+        </div>
+      ) : currentStageInfo && (
+        <div className="px-4 py-2 bg-brand-100 border-b border-brand-200">
+          <p className="text-xs text-brand-400">
+            📍 Stage: <span className="font-semibold text-brand-300">{currentStageInfo.label}</span>
           </p>
         </div>
       )}
@@ -154,8 +165,8 @@ export default function ChatPage() {
               className={cn(
                 'max-w-[85%] rounded-2xl px-4 py-3',
                 msg.role === 'user'
-                  ? 'bg-brand-600 text-white rounded-br-sm'
-                  : 'bg-warm-50 border border-warm-200 text-[#2c2c2c] rounded-bl-sm shadow-sm',
+                  ? 'bg-brand-500 text-[#0F0F0F] rounded-br-sm'
+                  : 'bg-warm-200 border border-warm-300 text-white rounded-bl-sm shadow-sm',
               )}
             >
               <p className="text-sm leading-relaxed whitespace-pre-wrap">{msg.content}</p>
@@ -212,7 +223,7 @@ export default function ChatPage() {
               <button
                 key={s}
                 onClick={() => sendMessage(s)}
-                className="block w-full text-left p-3 rounded-xl border border-warm-200 text-sm text-[#5c5c5c] hover:border-brand-300 hover:bg-brand-50 transition-all"
+                className="block w-full text-left p-3 rounded-xl border border-warm-200 text-sm text-slate-500 hover:border-brand-500 hover:bg-brand-100 transition-all"
               >
                 {s}
               </button>
@@ -243,7 +254,7 @@ export default function ChatPage() {
           <button
             onClick={() => sendMessage(input)}
             disabled={!input.trim() || isLoading}
-            className="w-11 h-11 rounded-xl bg-brand-600 hover:bg-brand-700 disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center transition-all flex-shrink-0"
+            className="w-11 h-11 rounded-xl bg-brand-500 hover:bg-brand-600 disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center transition-all flex-shrink-0"
           >
             <Send size={17} className="text-white" />
           </button>

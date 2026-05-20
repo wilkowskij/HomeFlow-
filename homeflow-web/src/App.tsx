@@ -31,6 +31,7 @@ import AppointmentDetailPage from '@/pages/schedule/AppointmentDetailPage';
 import JourneyPage from '@/pages/journey/JourneyPage';
 import StageDetailPage from '@/pages/journey/StageDetailPage';
 import AgentConnectPage from '@/pages/journey/AgentConnectPage';
+import PreApprovalPage from '@/pages/journey/PreApprovalPage';
 
 // AI Chat
 import ChatPage from '@/pages/chat/ChatPage';
@@ -112,6 +113,7 @@ export default function App() {
         <Route path="/journey" element={<JourneyPage />} />
         <Route path="/journey/stage/:stage" element={<StageDetailPage />} />
         <Route path="/journey/connect-agent" element={<AgentConnectPage />} />
+        <Route path="/journey/pre-approval" element={<PreApprovalPage />} />
 
         {/* Chat */}
         <Route path="/chat" element={<ChatPage />} />

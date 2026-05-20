@@ -57,7 +57,7 @@ export default function ScheduleModal({ propertyId, propertyAddress, onClose }: 
       <div className="fixed inset-0 bg-black/40 z-40 animate-fade-in" onClick={onClose} />
 
       {/* Bottom sheet */}
-      <div className="fixed bottom-0 left-0 right-0 z-50 bg-white rounded-t-3xl shadow-2xl animate-slide-up max-w-lg mx-auto">
+      <div className="fixed bottom-0 left-0 right-0 z-50 bg-[#1C1C1C] border-t border-warm-300 rounded-t-3xl shadow-2xl animate-slide-up max-w-lg mx-auto">
         <div className="px-5 pt-5 pb-8">
           {/* Handle */}
           <div className="w-10 h-1 bg-slate-200 rounded-full mx-auto mb-5" />

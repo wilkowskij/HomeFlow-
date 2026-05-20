@@ -61,7 +61,7 @@ export default function WelcomePage() {
   const busy = isLoading || submitting;
 
   return (
-    <div className="min-h-[100dvh] flex flex-col bg-warm-50">
+    <div className="min-h-[100dvh] flex flex-col bg-[#0F0F0F]">
       {/* Hero */}
       <div className="flex-1 flex flex-col items-center justify-center px-6 pt-12 pb-8 text-center">
         {/* Logo */}
@@ -69,7 +69,7 @@ export default function WelcomePage() {
           <Home size={28} className="text-white" />
         </div>
 
-        <h1 className="font-display font-bold text-4xl text-[#2c2c2c] leading-tight text-balance mb-3">
+        <h1 className="font-display font-bold text-4xl text-white leading-tight text-balance mb-3">
           Find your home,{' '}
           <span className="text-brand-600">stress&#8209;free</span>
         </h1>
@@ -83,9 +83,9 @@ export default function WelcomePage() {
           {FEATURES.map(({ icon: Icon, title, desc }) => (
             <div
               key={title}
-              className="flex items-start gap-3 p-4 rounded-2xl bg-warm-100 text-left animate-slide-up"
+              className="flex items-start gap-3 p-4 rounded-2xl bg-warm-200 border border-warm-300 text-left animate-slide-up"
             >
-              <div className="w-9 h-9 rounded-xl bg-brand-100 flex items-center justify-center flex-shrink-0 mt-0.5">
+              <div className="w-9 h-9 rounded-xl bg-brand-100 border border-brand-200 flex items-center justify-center flex-shrink-0 mt-0.5">
                 <Icon size={17} className="text-brand-600" />
               </div>
               <div>
@@ -103,8 +103,7 @@ export default function WelcomePage() {
         <button
           onClick={signInWithGoogle}
           disabled={busy}
-          className="w-full flex items-center justify-center gap-3 py-3.5 rounded-2xl border border-warm-200 bg-warm-50 hover:bg-warm-100 transition-colors font-semibold text-[#2c2c2c] disabled:opacity-60"
-          style={{ boxShadow: '4px 4px 8px rgba(0,0,0,0.07), -4px -4px 8px rgba(255,255,255,0.70)' }}
+          className="w-full flex items-center justify-center gap-3 py-3.5 rounded-2xl border border-warm-300 bg-warm-200 hover:bg-warm-300 hover:border-brand-500 transition-colors font-semibold text-white disabled:opacity-60"
         >
           <img src="/google-icon.svg" alt="Google" className="w-5 h-5" />
           Continue with Google
@@ -114,7 +113,7 @@ export default function WelcomePage() {
         <button
           onClick={signInWithApple}
           disabled={busy}
-          className="w-full flex items-center justify-center gap-3 py-3.5 rounded-2xl bg-slate-900 hover:bg-slate-800 transition-colors font-semibold text-white disabled:opacity-60"
+          className="w-full flex items-center justify-center gap-3 py-3.5 rounded-2xl bg-warm-200 border border-warm-300 hover:border-brand-500 transition-colors font-semibold text-white disabled:opacity-60"
         >
           <img src="/apple-icon.svg" alt="Apple" className="w-4 h-4 invert" />
           Continue with Apple
@@ -135,7 +134,7 @@ export default function WelcomePage() {
           /* Email form */
           <form
             onSubmit={handleEmailSubmit}
-            className="w-full rounded-2xl border border-slate-200 bg-white p-4 space-y-3 animate-fade-in"
+            className="w-full rounded-2xl border border-warm-300 bg-warm-200 p-4 space-y-3 animate-fade-in"
           >
             <div className="flex items-center justify-between mb-1">
               <p className="font-semibold text-slate-900 text-sm">
@@ -144,7 +143,7 @@ export default function WelcomePage() {
               <button
                 type="button"
                 onClick={() => { setEmailMode('hidden'); setError(null); }}
-                className="p-1 hover:bg-slate-100 rounded-lg"
+                className="p-1 hover:bg-warm-200 rounded-lg"
               >
                 <X size={15} className="text-slate-400" />
               </button>

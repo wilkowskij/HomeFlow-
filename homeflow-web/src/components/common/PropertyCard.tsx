@@ -87,9 +87,9 @@ export default function PropertyCard({
 
         {/* AI Match Score */}
         {showAiScore && property.aiInsights?.matchScore && (
-          <div className="absolute top-3 left-3 bg-white/95 backdrop-blur-sm rounded-full px-2.5 py-1 flex items-center gap-1 shadow-sm">
+          <div className="absolute top-3 left-3 bg-black/70 backdrop-blur-sm rounded-full px-2.5 py-1 flex items-center gap-1 shadow-sm">
             <Star size={12} className="text-amber-500 fill-amber-500" />
-            <span className="text-xs font-bold text-slate-900">
+            <span className="text-xs font-bold text-white">
               {property.aiInsights.matchScore}% match
             </span>
           </div>
@@ -115,7 +115,7 @@ export default function PropertyCard({
         <button
           onClick={handleSave}
           className={cn(
-            'absolute top-2.5 right-2.5 w-8 h-8 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center shadow-sm transition-all duration-150 hover:scale-110',
+            'absolute top-2.5 right-2.5 w-8 h-8 rounded-full bg-black/60 backdrop-blur-sm flex items-center justify-center shadow-sm transition-all duration-150 hover:scale-110',
           )}
         >
           <Heart
