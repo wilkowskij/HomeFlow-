@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowRight, ArrowLeft, Check, MapPin, DollarSign, Home, Clock } from 'lucide-react';
+import { ArrowRight, ArrowLeft, Check, MapPin, DollarSign, Home, Clock, ShieldCheck } from 'lucide-react';
 import { useAuthStore } from '@/store/authStore';
 import { useJourneyStore } from '@/store/journeyStore';
 import type { BuyerProfile, BuyingTimeline, PropertyType, PreApprovalStatus } from '@/types';
@@ -31,25 +31,32 @@ const MUST_HAVES = [
   'Short Commute', 'Updated Kitchen', 'Master Bath', 'Basement',
 ];
 
+const PRE_APPROVAL_OPTIONS = [
+  { value: 'approved', label: '✅ I have a pre-approval letter', desc: "You're ready to make offers right now", color: 'border-green-400 bg-green-50' },
+  { value: 'in-progress', label: '⏳ I\'m working on it', desc: 'In contact with a lender', color: 'border-amber-400 bg-amber-50' },
+  { value: 'none', label: '🚀 Not started yet', desc: "We'll help you get started", color: '' },
+] as const;
+
 export default function ProfileSetupPage() {
   const navigate = useNavigate();
   const { user, setProfile, setOnboardingComplete } = useAuthStore();
   const { initPipeline } = useJourneyStore();
 
   const [step, setStep] = useState(1);
+  const [saving, setSaving] = useState(false);
   const [form, setForm] = useState({
-    locations: ['Freehold, NJ'],
-    locationInput: '',
+    preApprovalStatus: 'none' as PreApprovalStatus,
     budgetMin: 400000,
     budgetMax: 600000,
     timeline: '3-6months' as BuyingTimeline,
+    locations: [] as string[],
+    locationInput: '',
     bedsMin: 3,
     bathsMin: 2,
     propertyTypes: ['single-family'] as PropertyType[],
     mustHaves: [] as string[],
     maxCommuteMinutes: 30,
     requiresYard: false,
-    preApprovalStatus: 'none' as PreApprovalStatus,
   });
 
   const goNext = async () => {
@@ -63,9 +70,10 @@ export default function ProfileSetupPage() {
 
   const handleComplete = async () => {
     if (!user) return;
+    setSaving(true);
     const profile: BuyerProfile = {
       userId: user.id,
-      locations: form.locations,
+      locations: form.locations.length > 0 ? form.locations : ['New Jersey'],
       budgetMin: form.budgetMin,
       budgetMax: form.budgetMax,
       timeline: form.timeline,
@@ -76,7 +84,7 @@ export default function ProfileSetupPage() {
         mustHaves: form.mustHaves,
         niceToHaves: [],
         maxCommuteMinutes: form.maxCommuteMinutes,
-        requiresYard: form.requiresYard,
+        requiresYard: form.mustHaves.includes('Yard'),
       },
       preApprovalStatus: form.preApprovalStatus,
     };
@@ -84,7 +92,7 @@ export default function ProfileSetupPage() {
     const dbPreApproval = form.preApprovalStatus.toUpperCase().replace('-', '_');
     await supabase.from('buyer_profiles').upsert({
       user_id: user.id,
-      locations: form.locations,
+      locations: profile.locations,
       budget_min: form.budgetMin,
       budget_max: form.budgetMax,
       timeline: form.timeline,
@@ -98,6 +106,7 @@ export default function ProfileSetupPage() {
     setProfile(profile);
     setOnboardingComplete();
     await initPipeline(user.id);
+    setSaving(false);
     navigate('/dashboard');
   };
 
@@ -149,61 +158,53 @@ export default function ProfileSetupPage() {
 
       {/* Step content */}
       <div className="flex-1 px-6 animate-fade-in">
-        {/* Step 1: Location */}
+
+        {/* Step 1: Pre-approval (qualifier) */}
         {step === 1 && (
           <div>
             <div className="flex items-center gap-2 mb-2">
-              <MapPin size={20} className="text-brand-500" />
-              <h2 className="font-display font-bold text-2xl text-slate-900">Where are you looking?</h2>
+              <ShieldCheck size={20} className="text-brand-500" />
+              <h2 className="font-display font-bold text-2xl text-slate-900">Pre-approval status</h2>
             </div>
-            <p className="text-slate-500 text-sm mb-6">Add one or more areas you're interested in.</p>
+            <p className="text-slate-500 text-sm mb-6">
+              This tells us how quickly you can move on a home you love.
+            </p>
 
-            <div className="flex gap-2 mb-3">
-              <input
-                className="input-base flex-1"
-                placeholder="e.g. Freehold, NJ"
-                value={form.locationInput}
-                onChange={(e) => setForm((f) => ({ ...f, locationInput: e.target.value }))}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' && form.locationInput.trim()) {
-                    setForm((f) => ({
-                      ...f,
-                      locations: [...f.locations, f.locationInput.trim()],
-                      locationInput: '',
-                    }));
-                  }
-                }}
-              />
-              <button
-                onClick={() => {
-                  if (form.locationInput.trim()) {
-                    setForm((f) => ({
-                      ...f,
-                      locations: [...f.locations, f.locationInput.trim()],
-                      locationInput: '',
-                    }));
-                  }
-                }}
-                className="btn-primary px-4"
-              >
-                Add
-              </button>
-            </div>
-
-            <div className="flex flex-wrap gap-2">
-              {form.locations.map((loc) => (
-                <span key={loc} className="badge bg-brand-100 text-brand-700 gap-1.5 py-1.5">
-                  <MapPin size={11} />
-                  {loc}
-                  <button
-                    onClick={() => setForm((f) => ({ ...f, locations: f.locations.filter((l) => l !== loc) }))}
-                    className="ml-0.5 text-brand-400 hover:text-brand-700"
-                  >
-                    ×
-                  </button>
-                </span>
+            <div className="space-y-3">
+              {PRE_APPROVAL_OPTIONS.map(({ value, label, desc, color }) => (
+                <button
+                  key={value}
+                  onClick={() => setForm((f) => ({ ...f, preApprovalStatus: value as PreApprovalStatus }))}
+                  className={cn(
+                    'w-full p-4 rounded-2xl border-2 text-left transition-all',
+                    form.preApprovalStatus === value
+                      ? color || 'border-brand-500 bg-brand-50'
+                      : 'border-warm-200 hover:border-brand-300',
+                  )}
+                >
+                  <p className="font-semibold text-slate-900">{label}</p>
+                  <p className="text-sm text-slate-500 mt-0.5">{desc}</p>
+                </button>
               ))}
             </div>
+
+            {form.preApprovalStatus === 'none' && (
+              <div className="mt-5 p-4 rounded-2xl bg-amber-50 border border-amber-200">
+                <p className="text-sm font-semibold text-amber-800 mb-1">💡 Why it matters</p>
+                <p className="text-xs text-amber-700 leading-relaxed">
+                  Pre-approved buyers close 30% faster and win more competitive offers.
+                  We'll guide you through the process after setup.
+                </p>
+              </div>
+            )}
+            {form.preApprovalStatus === 'approved' && (
+              <div className="mt-5 p-4 rounded-2xl bg-green-50 border border-green-200">
+                <p className="text-sm font-semibold text-green-800">🎉 You're ready to make offers!</p>
+                <p className="text-xs text-green-700 mt-0.5">
+                  You can upload your letter in the Journey tracker once you're set up.
+                </p>
+              </div>
+            )}
           </div>
         )}
 
@@ -273,8 +274,70 @@ export default function ProfileSetupPage() {
           </div>
         )}
 
-        {/* Step 3: Preferences */}
+        {/* Step 3: Location */}
         {step === 3 && (
+          <div>
+            <div className="flex items-center gap-2 mb-2">
+              <MapPin size={20} className="text-brand-500" />
+              <h2 className="font-display font-bold text-2xl text-slate-900">Where are you looking?</h2>
+            </div>
+            <p className="text-slate-500 text-sm mb-6">Add one or more areas you're interested in.</p>
+
+            <div className="flex gap-2 mb-3">
+              <input
+                className="input-base flex-1"
+                placeholder="e.g. Freehold, NJ"
+                value={form.locationInput}
+                onChange={(e) => setForm((f) => ({ ...f, locationInput: e.target.value }))}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && form.locationInput.trim()) {
+                    setForm((f) => ({
+                      ...f,
+                      locations: [...f.locations, f.locationInput.trim()],
+                      locationInput: '',
+                    }));
+                  }
+                }}
+              />
+              <button
+                onClick={() => {
+                  if (form.locationInput.trim()) {
+                    setForm((f) => ({
+                      ...f,
+                      locations: [...f.locations, f.locationInput.trim()],
+                      locationInput: '',
+                    }));
+                  }
+                }}
+                className="btn-primary px-4"
+              >
+                Add
+              </button>
+            </div>
+
+            <div className="flex flex-wrap gap-2">
+              {form.locations.map((loc) => (
+                <span key={loc} className="badge bg-brand-100 text-brand-700 gap-1.5 py-1.5">
+                  <MapPin size={11} />
+                  {loc}
+                  <button
+                    onClick={() => setForm((f) => ({ ...f, locations: f.locations.filter((l) => l !== loc) }))}
+                    className="ml-0.5 text-brand-400 hover:text-brand-700"
+                  >
+                    ×
+                  </button>
+                </span>
+              ))}
+            </div>
+
+            {form.locations.length === 0 && (
+              <p className="text-xs text-slate-400 mt-3">No locations added yet — you can add these later.</p>
+            )}
+          </div>
+        )}
+
+        {/* Step 4: Preferences */}
+        {step === 4 && (
           <div>
             <div className="flex items-center gap-2 mb-2">
               <Home size={20} className="text-brand-500" />
@@ -283,30 +346,26 @@ export default function ProfileSetupPage() {
             <p className="text-slate-500 text-sm mb-6">Size, type, and must-have features.</p>
 
             <div className="space-y-5">
-              {/* Beds & baths */}
-              <div className="flex gap-4">
-                <div className="flex-1">
-                  <label className="text-sm font-semibold text-slate-700 mb-2 block">Min bedrooms</label>
-                  <div className="flex items-center gap-3">
-                    {[1, 2, 3, 4, 5].map((n) => (
-                      <button
-                        key={n}
-                        onClick={() => setForm((f) => ({ ...f, bedsMin: n }))}
-                        className={cn(
-                          'w-9 h-9 rounded-xl font-semibold text-sm transition-all',
-                          form.bedsMin === n
-                            ? 'bg-brand-500 text-white'
-                            : 'bg-slate-100 text-slate-600 hover:bg-slate-200',
-                        )}
-                      >
-                        {n}+
-                      </button>
-                    ))}
-                  </div>
+              <div>
+                <label className="text-sm font-semibold text-slate-700 mb-2 block">Min bedrooms</label>
+                <div className="flex items-center gap-3">
+                  {[1, 2, 3, 4, 5].map((n) => (
+                    <button
+                      key={n}
+                      onClick={() => setForm((f) => ({ ...f, bedsMin: n }))}
+                      className={cn(
+                        'w-9 h-9 rounded-xl font-semibold text-sm transition-all',
+                        form.bedsMin === n
+                          ? 'bg-brand-500 text-white'
+                          : 'bg-slate-100 text-slate-600 hover:bg-slate-200',
+                      )}
+                    >
+                      {n}+
+                    </button>
+                  ))}
                 </div>
               </div>
 
-              {/* Property type */}
               <div>
                 <label className="text-sm font-semibold text-slate-700 mb-2 block">Property type</label>
                 <div className="grid grid-cols-2 gap-2">
@@ -330,7 +389,6 @@ export default function ProfileSetupPage() {
                 </div>
               </div>
 
-              {/* Must-haves */}
               <div>
                 <label className="text-sm font-semibold text-slate-700 mb-2 block">Must-haves</label>
                 <div className="flex flex-wrap gap-2">
@@ -353,68 +411,30 @@ export default function ProfileSetupPage() {
             </div>
           </div>
         )}
-
-        {/* Step 4: Pre-approval */}
-        {step === 4 && (
-          <div>
-            <h2 className="font-display font-bold text-2xl text-slate-900 mb-2">Pre-approval status</h2>
-            <p className="text-slate-500 text-sm mb-6">
-              Knowing your pre-approval status helps us prioritize listings and prepare for offers.
-            </p>
-
-            <div className="space-y-3">
-              {[
-                { value: 'approved', label: '✅ I have a pre-approval letter', desc: "You're ready to make offers" },
-                { value: 'in-progress', label: '⏳ I\'m working on it', desc: 'In contact with a lender' },
-                { value: 'none', label: '🚀 Not started yet', desc: "We'll help you get started" },
-              ].map(({ value, label, desc }) => (
-                <button
-                  key={value}
-                  onClick={() => setForm((f) => ({ ...f, preApprovalStatus: value as PreApprovalStatus }))}
-                  className={cn(
-                    'w-full p-4 rounded-2xl border-2 text-left transition-all',
-                    form.preApprovalStatus === value
-                      ? 'border-brand-500 bg-brand-50'
-                      : 'border-warm-200 hover:border-brand-300',
-                  )}
-                >
-                  <p className="font-semibold text-slate-900">{label}</p>
-                  <p className="text-sm text-slate-500 mt-0.5">{desc}</p>
-                </button>
-              ))}
-            </div>
-
-            <div className="mt-6 p-4 rounded-2xl bg-amber-50 border border-amber-200">
-              <p className="text-sm text-amber-800 font-medium">
-                💡 You can upload your pre-approval letter later in your Journey tracker.
-              </p>
-            </div>
-          </div>
-        )}
       </div>
 
       {/* Footer */}
       <div className="px-6 pb-10 pt-6">
-        <button onClick={goNext} className="btn-primary w-full flex items-center justify-center gap-2">
-          {step === TOTAL_STEPS ? (
-            <>
-              <Check size={18} />
-              Start my HomeFlow journey
-            </>
+        <button
+          onClick={goNext}
+          disabled={saving}
+          className="btn-primary w-full flex items-center justify-center gap-2 disabled:opacity-60"
+        >
+          {saving ? (
+            'Setting up your journey…'
+          ) : step === TOTAL_STEPS ? (
+            <><Check size={18} />Start my HomeFlow journey</>
           ) : (
-            <>
-              Continue
-              <ArrowRight size={18} />
-            </>
+            <>Continue<ArrowRight size={18} /></>
           )}
         </button>
 
-        {step === 1 && (
+        {step === TOTAL_STEPS && (
           <button
             onClick={handleComplete}
             className="w-full text-center text-sm text-slate-400 hover:text-slate-600 mt-3 py-2"
           >
-            Skip for now
+            Skip preferences for now
           </button>
         )}
       </div>

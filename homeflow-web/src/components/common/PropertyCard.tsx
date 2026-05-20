@@ -160,11 +160,15 @@ export default function PropertyCard({
           </span>
         </div>
 
-        {/* AI summary snippet */}
-        {property.aiInsights?.summary && (
-          <p className="mt-2 text-xs text-slate-500 line-clamp-2 leading-relaxed">
-            {property.aiInsights.summary}
-          </p>
+        {/* AI match reasons */}
+        {property.aiInsights && property.aiInsights.pros.length > 0 && (
+          <div className="mt-2 flex flex-wrap gap-1">
+            {property.aiInsights.pros.slice(0, 2).map((pro, i) => (
+              <span key={i} className="text-[10px] bg-green-50 text-green-700 border border-green-100 rounded-full px-2 py-0.5">
+                ✓ {pro}
+              </span>
+            ))}
+          </div>
         )}
 
         {/* CTA */}

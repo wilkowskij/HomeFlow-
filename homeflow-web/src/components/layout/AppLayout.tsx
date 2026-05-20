@@ -2,6 +2,7 @@ import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import {
   Home,
   Search,
+  Heart,
   Calendar,
   MapPin,
   MessageCircle,
@@ -10,19 +11,21 @@ import {
 } from 'lucide-react';
 import { cn } from '@/utils/cn';
 import { useChatStore } from '@/store/chatStore';
+import { useSearchStore } from '@/store/searchStore';
 
 const NAV_ITEMS = [
   { path: '/dashboard', icon: Home, label: 'Home' },
   { path: '/search', icon: Search, label: 'Search' },
+  { path: '/saved', icon: Heart, label: 'Saved' },
   { path: '/schedule', icon: Calendar, label: 'Schedule' },
-  { path: '/journey', icon: MapPin, label: 'My Journey' },
-  { path: '/chat', icon: MessageCircle, label: 'Chat' },
+  { path: '/journey', icon: MapPin, label: 'Journey' },
 ];
 
 export default function AppLayout() {
   const location = useLocation();
   const navigate = useNavigate();
   const { isLoading: chatLoading } = useChatStore();
+  const { savedHomes } = useSearchStore();
 
   const isActive = (path: string) => location.pathname.startsWith(path);
 
@@ -40,11 +43,21 @@ export default function AppLayout() {
             </span>
           </button>
 
-          <div className="flex items-center gap-2">
-            <button className="relative p-2 rounded-xl hover:bg-warm-100 transition-colors">
-              <Bell size={20} className="text-[#5c5c5c]" />
-              {/* Notification dot */}
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-brand-500 rounded-full" />
+          <div className="flex items-center gap-1">
+            <button
+              onClick={() => navigate('/chat')}
+              className={cn(
+                'relative p-2 rounded-xl transition-colors',
+                location.pathname.startsWith('/chat') ? 'text-brand-600 bg-brand-50' : 'text-[#5c5c5c] hover:bg-warm-100',
+              )}
+            >
+              <MessageCircle size={20} />
+              {chatLoading && (
+                <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-brand-500 rounded-full animate-pulse" />
+              )}
+            </button>
+            <button className="relative p-2 rounded-xl hover:bg-warm-100 transition-colors text-[#5c5c5c]">
+              <Bell size={20} />
             </button>
             <button
               onClick={() => navigate('/profile')}
@@ -68,7 +81,7 @@ export default function AppLayout() {
         <div className="flex items-center max-w-lg mx-auto px-2 h-16">
           {NAV_ITEMS.map(({ path, icon: Icon, label }) => {
             const active = isActive(path);
-            const isChatActive = path === '/chat' && chatLoading;
+            const savedBadge = path === '/saved' && savedHomes.length > 0;
 
             return (
               <button
@@ -90,8 +103,10 @@ export default function AppLayout() {
                     )}
                     strokeWidth={active ? 2.5 : 1.75}
                   />
-                  {isChatActive && (
-                    <span className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-brand-500 rounded-full animate-pulse" />
+                  {savedBadge && (
+                    <span className="absolute -top-1 -right-1.5 min-w-[14px] h-3.5 bg-pink-500 rounded-full text-[9px] text-white font-bold flex items-center justify-center px-0.5">
+                      {savedHomes.length}
+                    </span>
                   )}
                 </div>
                 <span

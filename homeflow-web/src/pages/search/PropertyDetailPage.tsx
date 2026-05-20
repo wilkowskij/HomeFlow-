@@ -82,11 +82,14 @@ export default function PropertyDetailPage() {
               </div>
             </div>
             {property.aiInsights?.matchScore && (
-              <div className="flex items-center gap-1 bg-amber-50 border border-amber-200 rounded-xl px-2.5 py-1.5">
-                <Star size={13} className="text-amber-500 fill-amber-500" />
-                <span className="text-xs font-bold text-amber-700">
-                  {property.aiInsights.matchScore}% match
-                </span>
+              <div className="flex flex-col items-end gap-1">
+                <div className="flex items-center gap-1 bg-amber-50 border border-amber-200 rounded-xl px-2.5 py-1.5">
+                  <Star size={13} className="text-amber-500 fill-amber-500" />
+                  <span className="text-xs font-bold text-amber-700">
+                    {property.aiInsights.matchScore}% match
+                  </span>
+                </div>
+                <p className="text-[10px] text-slate-400">based on your profile</p>
               </div>
             )}
           </div>

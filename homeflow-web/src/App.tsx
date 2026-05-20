@@ -18,6 +18,7 @@ import DashboardPage from '@/pages/dashboard/DashboardPage';
 
 // Search & Discovery
 import SearchPage from '@/pages/search/SearchPage';
+import SavedHomesPage from '@/pages/search/SavedHomesPage';
 import PropertyDetailPage from '@/pages/search/PropertyDetailPage';
 import ComparePage from '@/pages/search/ComparePage';
 
@@ -98,6 +99,7 @@ export default function App() {
 
         {/* Search */}
         <Route path="/search" element={<SearchPage />} />
+        <Route path="/saved" element={<SavedHomesPage />} />
         <Route path="/search/property/:id" element={<PropertyDetailPage />} />
         <Route path="/search/compare" element={<ComparePage />} />
 
