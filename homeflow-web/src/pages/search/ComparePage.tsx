@@ -1,6 +1,10 @@
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, X } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
 import { useSearchStore } from '@/store/searchStore';
+import { supabase } from '@/lib/supabase';
+import { mapDbPropertyToApp } from '@/lib/mappers';
+import type { PropertyRow } from '@/types/database';
 import { formatCurrency, formatSqft } from '@/utils/cn';
 
 type CompareFieldKey = 'price' | 'beds' | 'baths' | 'sqft' | 'yearBuilt';
@@ -19,8 +23,20 @@ const COMPARE_FIELDS: Array<{
 
 export default function ComparePage() {
   const navigate = useNavigate();
-  const { compareList, toggleCompare, savedHomes } = useSearchStore();
-  const properties = savedHomes.filter((p) => compareList.includes(p.id));
+  const { compareList, toggleCompare } = useSearchStore();
+
+  const { data: properties = [] } = useQuery({
+    queryKey: ['compare', compareList],
+    queryFn: async () => {
+      if (compareList.length === 0) return [];
+      const { data } = await supabase
+        .from('properties')
+        .select('*')
+        .in('id', compareList);
+      return (data ?? []).map((row) => mapDbPropertyToApp(row as PropertyRow));
+    },
+    enabled: compareList.length > 0,
+  });
 
   if (properties.length === 0) {
     return (

@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, CheckCircle2, Circle, Upload } from 'lucide-react';
 import { useJourneyStore } from '@/store/journeyStore';
@@ -14,7 +14,6 @@ export default function StageDetailPage() {
   const navigate = useNavigate();
   const { pipeline, completeTask, uploadDocument, advanceStage } = useJourneyStore();
   const { user } = useAuthStore();
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const [uploadingDocId, setUploadingDocId] = useState<string | null>(null);
 
   const handleUpload = async (docId: string, file: File) => {
@@ -150,7 +149,7 @@ export default function StageDetailPage() {
                 {doc.status === 'missing' && (
                   <>
                     <input
-                      ref={fileInputRef}
+                      id={`file-${doc.id}`}
                       type="file"
                       className="hidden"
                       accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
@@ -161,7 +160,7 @@ export default function StageDetailPage() {
                       }}
                     />
                     <button
-                      onClick={() => fileInputRef.current?.click()}
+                      onClick={() => document.getElementById(`file-${doc.id}`)?.click()}
                       disabled={uploadingDocId === doc.id}
                       className="text-xs font-semibold text-brand-600 hover:text-brand-700 disabled:opacity-50"
                     >

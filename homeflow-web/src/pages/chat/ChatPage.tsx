@@ -20,7 +20,7 @@ export default function ChatPage() {
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
-  const { messages, isLoading, addMessage, setLoading, clearMessages } = useChatStore();
+  const { messages, isLoading, hasFetched, addMessage, setLoading, clearMessages } = useChatStore();
   const { pipeline } = useJourneyStore();
   const { user, profile } = useAuthStore();
 
@@ -32,9 +32,9 @@ export default function ChatPage() {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  // Initial greeting if no messages
+  // Inject greeting only after DB fetch confirms no history exists
   useEffect(() => {
-    if (messages.length === 0) {
+    if (hasFetched && messages.length === 0) {
       addMessage({
         role: 'assistant',
         content: `Hi${user?.displayName ? ` ${user.displayName.split(' ')[0]}` : ''}! 👋 I'm your HomeFlow AI coach. I can help you navigate every step of buying your home.\n\n${currentStageInfo ? `You're currently in **${currentStageInfo.label}**. What do you need help with?` : "What questions do you have about buying a home?"}`,
@@ -46,7 +46,7 @@ export default function ChatPage() {
         })),
       });
     }
-  }, []);
+  }, [hasFetched]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const sendMessage = async (text: string) => {
     if (!text.trim() || isLoading) return;
@@ -65,7 +65,7 @@ export default function ChatPage() {
     ].filter(Boolean).join(' ');
 
     try {
-      const response = await fetch('https://api.anthropic.com/v1/messages', {
+      const response = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

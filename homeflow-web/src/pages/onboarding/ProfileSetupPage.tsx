@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { ArrowRight, ArrowLeft, Check, MapPin, DollarSign, Home, Clock } from 'lucide-react';
 import { useAuthStore } from '@/store/authStore';
 import { useJourneyStore } from '@/store/journeyStore';
-import type { BuyerProfile, BuyingTimeline, PropertyType } from '@/types';
+import type { BuyerProfile, BuyingTimeline, PropertyType, PreApprovalStatus } from '@/types';
 import { TIMELINE_LABELS } from '@/constants';
 import { cn } from '@/utils/cn';
 import { supabase } from '@/lib/supabase';
@@ -49,6 +49,7 @@ export default function ProfileSetupPage() {
     mustHaves: [] as string[],
     maxCommuteMinutes: 30,
     requiresYard: false,
+    preApprovalStatus: 'none' as PreApprovalStatus,
   });
 
   const goNext = async () => {
@@ -77,9 +78,10 @@ export default function ProfileSetupPage() {
         maxCommuteMinutes: form.maxCommuteMinutes,
         requiresYard: form.requiresYard,
       },
-      preApprovalStatus: 'none',
+      preApprovalStatus: form.preApprovalStatus,
     };
 
+    const dbPreApproval = form.preApprovalStatus.toUpperCase().replace('-', '_');
     await supabase.from('buyer_profiles').upsert({
       user_id: user.id,
       locations: form.locations,
@@ -90,7 +92,7 @@ export default function ProfileSetupPage() {
       bathrooms_min: form.bathsMin,
       property_types: form.propertyTypes.map((t) => APP_TO_DB_PROPERTY_TYPE[t]),
       must_haves: form.mustHaves,
-      pre_approval_status: 'NONE',
+      pre_approval_status: dbPreApproval,
     }, { onConflict: 'user_id' });
 
     setProfile(profile);
@@ -368,7 +370,13 @@ export default function ProfileSetupPage() {
               ].map(({ value, label, desc }) => (
                 <button
                   key={value}
-                  className="w-full p-4 rounded-2xl border-2 border-warm-200 hover:border-brand-300 text-left transition-all"
+                  onClick={() => setForm((f) => ({ ...f, preApprovalStatus: value as PreApprovalStatus }))}
+                  className={cn(
+                    'w-full p-4 rounded-2xl border-2 text-left transition-all',
+                    form.preApprovalStatus === value
+                      ? 'border-brand-500 bg-brand-50'
+                      : 'border-warm-200 hover:border-brand-300',
+                  )}
                 >
                   <p className="font-semibold text-slate-900">{label}</p>
                   <p className="text-sm text-slate-500 mt-0.5">{desc}</p>

@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { Home, ArrowRight, Sparkles, MapPin, Calendar, Mail, Eye, EyeOff, X } from 'lucide-react';
 import { useAuthStore } from '@/store/authStore';
 import { cn } from '@/utils/cn';
@@ -25,7 +24,6 @@ const FEATURES = [
 type EmailMode = 'hidden' | 'signin' | 'signup';
 
 export default function WelcomePage() {
-  const navigate = useNavigate();
   const { signInWithGoogle, signInWithApple, signInWithEmail, signUpWithEmail, isLoading } = useAuthStore();
 
   const [emailMode, setEmailMode] = useState<EmailMode>('hidden');
@@ -50,10 +48,11 @@ export default function WelcomePage() {
     if (err) {
       setError(err.message);
     } else if (emailMode === 'signup') {
-      // After sign-up Supabase may require email confirmation; inform the user.
-      setError(null);
-      setEmailMode('hidden');
-      navigate('/onboarding');
+      // Supabase requires email confirmation before a session is created.
+      // Don't navigate — show a message and let the user confirm then sign in.
+      setError('Account created! Check your email to confirm, then sign in here.');
+      setEmailMode('signin');
+      setPassword('');
     }
     // Sign-in success: onAuthStateChange fires → App.tsx redirects automatically.
   };

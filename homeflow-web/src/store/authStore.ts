@@ -80,6 +80,8 @@ interface AuthState {
   _handleSupabaseUser: (su: SupabaseUser | null) => Promise<void>;
 }
 
+let authSubscription: { unsubscribe: () => void } | null = null;
+
 async function fetchBuyerProfile(userId: string): Promise<BuyerProfile | null> {
   const { data } = await supabase
     .from('buyer_profiles')
@@ -114,12 +116,17 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
   },
 
   initialize: async () => {
+    authSubscription?.unsubscribe();
+
     const { data: { session } } = await supabase.auth.getSession();
     await get()._handleSupabaseUser(session?.user ?? null);
 
-    supabase.auth.onAuthStateChange(async (_event, session) => {
-      await get()._handleSupabaseUser(session?.user ?? null);
-    });
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (_event, session) => {
+        await get()._handleSupabaseUser(session?.user ?? null);
+      },
+    );
+    authSubscription = subscription;
   },
 
   signInWithGoogle: async () => {

@@ -5,6 +5,7 @@ import { supabase } from '../lib/supabase';
 interface ChatState {
   messages: ChatMessage[];
   isLoading: boolean;
+  hasFetched: boolean;
   context: ChatContext | null;
 
   fetchMessages: (userId: string) => Promise<void>;
@@ -18,6 +19,7 @@ interface ChatState {
 export const useChatStore = create<ChatState>()((set, get) => ({
   messages: [],
   isLoading: false,
+  hasFetched: false,
   context: null,
 
   fetchMessages: async (userId) => {
@@ -28,16 +30,17 @@ export const useChatStore = create<ChatState>()((set, get) => ({
       .order('created_at', { ascending: true })
       .limit(100);
 
-    if (data && data.length > 0) {
-      set({
-        messages: data.map((row) => ({
-          id: row.id,
-          role: row.role as ChatMessage['role'],
-          content: row.content,
-          timestamp: row.created_at,
-        })),
-      });
-    }
+    set({
+      hasFetched: true,
+      messages: data && data.length > 0
+        ? data.map((row) => ({
+            id: row.id,
+            role: row.role as ChatMessage['role'],
+            content: row.content,
+            timestamp: row.created_at,
+          }))
+        : [],
+    });
   },
 
   addMessage: (msg, userId) => {

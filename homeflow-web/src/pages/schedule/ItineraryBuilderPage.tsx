@@ -3,7 +3,6 @@ import { ArrowLeft, Plus, Route, X } from 'lucide-react';
 import { useSearchStore } from '@/store/searchStore';
 import { useScheduleStore } from '@/store/scheduleStore';
 import PropertyCard from '@/components/common/PropertyCard';
-import { MOCK_PROPERTIES } from '@/utils/mockData';
 import { formatCurrency } from '@/utils/cn';
 import toast from 'react-hot-toast';
 
@@ -17,10 +16,10 @@ export default function ItineraryBuilderPage() {
     clearItineraryBuilder,
   } = useScheduleStore();
 
-  const selectedProperties = MOCK_PROPERTIES.filter((p) =>
+  const selectedProperties = savedHomes.filter((p) =>
     pendingItineraryPropertyIds.includes(p.id),
   );
-  const availableToAdd = (savedHomes.length > 0 ? savedHomes : MOCK_PROPERTIES).filter(
+  const availableToAdd = savedHomes.filter(
     (p) => !pendingItineraryPropertyIds.includes(p.id),
   );
 
