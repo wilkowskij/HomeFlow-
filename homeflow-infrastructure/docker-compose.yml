@@ -1,0 +1,99 @@
+version: "3.9"
+
+services:
+  # ─── Infrastructure ───────────────────────────────────────────────────────────
+  postgres:
+    image: postgres:16-alpine
+    container_name: homeflow_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: homeflow
+      POSTGRES_PASSWORD: homeflow_dev_password
+      POSTGRES_DB: homeflow_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U homeflow"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: homeflow_redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ─── Backend API ──────────────────────────────────────────────────────────────
+  api:
+    build:
+      context: ../homeflow-api
+      dockerfile: Dockerfile
+    container_name: homeflow_api
+    restart: unless-stopped
+    environment:
+      NODE_ENV: development
+      PORT: 3001
+      DATABASE_URL: postgresql://homeflow:homeflow_dev_password@postgres:5432/homeflow_db
+      JWT_SECRET: ${JWT_SECRET:-dev-secret-change-in-production}
+      REFRESH_TOKEN_SECRET: ${REFRESH_TOKEN_SECRET:-dev-refresh-secret}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
+      ALLOWED_ORIGINS: http://localhost:5173
+      REDIS_URL: redis://redis:6379
+    ports:
+      - "3001:3001"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ../homeflow-api/src:/app/src:ro  # hot reload in dev
+    command: npm run dev
+
+  # ─── AI Service ───────────────────────────────────────────────────────────────
+  ai-service:
+    build:
+      context: ../homeflow-ai-service
+      dockerfile: Dockerfile
+    container_name: homeflow_ai
+    restart: unless-stopped
+    environment:
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
+      ALLOWED_ORIGINS: http://localhost:5173,http://localhost:3001
+      LOG_LEVEL: INFO
+    ports:
+      - "8000:8000"
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+
+  # ─── Frontend ─────────────────────────────────────────────────────────────────
+  web:
+    build:
+      context: ../homeflow-web
+      dockerfile: Dockerfile
+    container_name: homeflow_web
+    restart: unless-stopped
+    environment:
+      VITE_API_URL: http://localhost:3001/api
+      VITE_AI_SERVICE_URL: http://localhost:8000/api
+    ports:
+      - "5173:5173"
+    depends_on:
+      - api
+      - ai-service
+    volumes:
+      - ../homeflow-web/src:/app/src:ro
+
+volumes:
+  postgres_data:
+  redis_data:

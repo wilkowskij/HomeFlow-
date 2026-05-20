@@ -1,0 +1,165 @@
+// This is your Prisma schema file
+// Learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum PropertyType {
+  SINGLE_FAMILY
+  TOWNHOUSE
+  CONDO
+  MULTI_FAMILY
+  LAND
+}
+
+enum JourneyStage {
+  PROFILE_PREAPPROVAL
+  SEARCHING
+  OFFER_SUBMITTED
+  INSPECTION_DUE_DILIGENCE
+  CLOSING
+}
+
+enum AppointmentStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+  COMPLETED
+}
+
+model User {
+  id            String   @id @default(cuid())
+  email         String   @unique
+  passwordHash  String?
+  firstName     String
+  lastName      String
+  avatarUrl     String?
+  googleId      String?  @unique
+  appleId       String?  @unique
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  buyerProfile  BuyerProfile?
+  savedHomes    SavedHome[]
+  appointments  ViewingAppointment[]
+  journey       JourneyPipeline?
+  chatSessions  ChatSession[]
+}
+
+model BuyerProfile {
+  id                  String   @id @default(cuid())
+  userId              String   @unique
+  user                User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  locations           String[]
+  budgetMin           Int
+  budgetMax           Int
+  timeline            String
+  bedroomsMin         Int      @default(2)
+  bedroomsMax         Int?
+  bathroomsMin        Float    @default(1)
+  propertyTypes       PropertyType[]
+  mustHaves           String[]
+  preApprovalStatus   String   @default("NONE")
+  preApprovalAmount   Int?
+  preApprovalDoc      String?
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+}
+
+model Property {
+  id                String       @id @default(cuid())
+  mlsId             String?      @unique
+  address           String
+  city              String
+  state             String       @default("NJ")
+  zip               String
+  price             Int
+  bedrooms          Int
+  bathrooms         Float
+  squareFeet        Int?
+  lotSize           Float?
+  yearBuilt         Int?
+  propertyType      PropertyType
+  description       String?
+  photos            String[]
+  virtualTourUrl    String?
+  listingStatus     String       @default("ACTIVE")
+  daysOnMarket      Int          @default(0)
+  priceHistory      Json?
+  lat               Float?
+  lng               Float?
+  neighborhoodData  Json?
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+
+  savedBy           SavedHome[]
+  appointments      ViewingAppointment[]
+}
+
+model SavedHome {
+  id         String   @id @default(cuid())
+  userId     String
+  propertyId String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  notes      String?
+  rating     Int?
+  savedAt    DateTime @default(now())
+
+  @@unique([userId, propertyId])
+}
+
+model ViewingAppointment {
+  id           String            @id @default(cuid())
+  userId       String
+  propertyId   String
+  user         User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  property     Property          @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  scheduledAt  DateTime
+  duration     Int               @default(60)
+  status       AppointmentStatus @default(PENDING)
+  agentName    String?
+  agentPhone   String?
+  notes        String?
+  postVisitRating Int?
+  postVisitNotes  String?
+  itineraryId  String?
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+}
+
+model JourneyPipeline {
+  id           String       @id @default(cuid())
+  userId       String       @unique
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  currentStage JourneyStage @default(PROFILE_PREAPPROVAL)
+  agentId      String?
+  agentData    Json?
+  stageData    Json?
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+}
+
+model ChatSession {
+  id        String        @id @default(cuid())
+  userId    String
+  user      User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  messages  ChatMessage[]
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+}
+
+model ChatMessage {
+  id        String      @id @default(cuid())
+  sessionId String
+  session   ChatSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  role      String
+  content   String
+  createdAt DateTime    @default(now())
+}

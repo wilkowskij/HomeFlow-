@@ -1,0 +1,25 @@
+{
+  "name": "homeflow",
+  "version": "1.0.0",
+  "private": true,
+  "description": "HomeFlow — AI-powered home buying companion (NJ)",
+  "workspaces": [
+    "homeflow-shared",
+    "homeflow-web",
+    "homeflow-api"
+  ],
+  "scripts": {
+    "dev": "pnpm --parallel --filter homeflow-web --filter homeflow-api run dev",
+    "build": "pnpm --filter homeflow-shared run build && pnpm --parallel --filter homeflow-web --filter homeflow-api run build",
+    "lint": "pnpm -r run lint",
+    "type-check": "pnpm -r run type-check",
+    "clean": "pnpm -r exec -- rm -rf dist node_modules .next .turbo",
+    "docker:up": "cd homeflow-infrastructure && docker compose up --build",
+    "docker:down": "cd homeflow-infrastructure && docker compose down"
+  },
+  "engines": {
+    "node": ">=20",
+    "pnpm": ">=9"
+  },
+  "packageManager": "pnpm@9.0.0"
+}

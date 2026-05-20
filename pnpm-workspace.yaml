@@ -1,0 +1,4 @@
+packages:
+  - "homeflow-shared"
+  - "homeflow-web"
+  - "homeflow-api"
